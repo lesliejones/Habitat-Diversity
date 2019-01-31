@@ -1,0 +1,66 @@
+---
+title: "Contribution"
+author: "Leslie Jones"
+date: "January 29, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## R Markdown
+
+```{r}
+## get contribution of variable to PC scores
+# Helper function 
+#::::::::::::::::::::::::::::::::::::::::
+var_coord_func <- function(loadings, comp.sdev){
+  loadings*comp.sdev
+}
+# Compute Coordinates
+#::::::::::::::::::::::::::::::::::::::::
+loadings <- res.pca$rotation
+sdev <- res.pca$sdev
+var.coord <- t(apply(loadings, 1, var_coord_func, sdev)) 
+View(var.coord)
+# Compute Cos2
+#::::::::::::::::::::::::::::::::::::::::
+var.cos2 <- var.coord^2
+View (var.cos2)
+# Compute contributions
+#::::::::::::::::::::::::::::::::::::::::
+comp.cos2 <- apply(var.cos2, 2, sum)
+contrib <- function(var.cos2, comp.cos2){var.cos2*100/comp.cos2}
+var.contrib <- t(apply(var.cos2,1, contrib, comp.cos2))
+View(var.contrib)
+
+#PCA for individuals
+# Coordinates of individuals
+#::::::::::::::::::::::::::::::::::
+ind.coord <- res.pca$x
+View(ind.coord)
+# Cos2 of individuals
+#:::::::::::::::::::::::::::::::::
+# 1. square of the distance between an individual and the
+# PCA center of gravity
+center <- res.pca$center
+scale<- res.pca$scale
+getdistance <- function(ind_row, center, scale){
+  return(sum(((ind_row-center)/scale)^2))
+}
+d2 <- apply(Phab_z,1,getdistance, center, scale)
+# 2. Compute the cos2. The sum of each row is 1
+cos2 <- function(ind.coord, d2){return(ind.coord^2/d2)}
+ind.cos2 <- apply(ind.coord, 2, cos2, d2)
+View(ind.cos2)
+# Contributions of individuals
+#:::::::::::::::::::::::::::::::
+contrib <- function(ind.coord, comp.sdev, n.ind){
+  100*(1/n.ind)*ind.coord^2/comp.sdev^2
+}
+ind.contrib <- t(apply(ind.coord, 1, contrib, 
+                       res.pca$sdev, nrow(ind.coord)))
+View(ind.contrib)
+```
+

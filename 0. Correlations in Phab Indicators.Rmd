@@ -1,0 +1,155 @@
+---
+title: "Correlations"
+author: "Leslie Jones"
+date: "January 29, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo =FALSE)
+library(readr)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(psych)
+library(FactoMineR)
+library(ade4)
+library(amap)
+library(vegan)
+library(knitr)
+library(reshape2)
+library(MASS)
+library(data.table)
+library(factoextra)
+library (colorspace)
+library (RColorBrewer)
+library(ggplot2)
+library(lattice)
+library(readr)
+library (corrplot)
+#install.packages("PerformanceAnalytics")
+library("PerformanceAnalytics")
+setwd ("C:/Habitat_Diversity/Analysis")
+```
+
+## Correlations in Phab data
+```{r}
+#load data
+Phab <- read_csv("C:/Habitat_Diversity/Analysis/Data/Phab_HUClevel_NEW_corr.csv")
+#View(Phab)
+Phab$cv_elev <- Phab$std_elev/Phab$avg_elev
+
+```
+#HUC Geomorphic Correlations
+I used indices for acceptable limits of ±2 for skewness(Trochim & Donnelly, 2006; Field, 2000 & 2009; Gravetter & Wallnau, 2014) 
+References:
+Trochim, W. M., & Donnelly, J. P. (2006). The research methods knowledge base (3rd ed.). Cincinnati, OH:Atomic Dog.
+Gravetter, F., & Wallnau, L. (2014). Essentials of statistics for the behavioral sciences (8th ed.). Belmont, CA: Wadsworth.
+Field, A. (2000). Discovering statistics using spss for windows. London-Thousand Oaks- New Delhi: Sage publications.
+Field, A. (2009). Discovering statistics using SPSS. London: SAGE.
+```{r}
+shed <- c("dem_cv", "dem_std", "dem_mean", "dem_max", "slope_cv", "slope_std", "slope_mean", "slope_max")
+Phab_shed <- Phab[shed]
+
+pairs(Phab_shed)
+
+res <- cor(Phab_shed)
+round(res,2)
+
+corrplot(res, type="upper", order="hclust",
+         tl.col="black", tl.srt=45)
+
+chart.Correlation(Phab_shed, histogram=TRUE, pch=19)
+
+#test for skewness
+geo_huc <- skewness(Phab_shed)
+View(geo_huc)
+```
+
+#Stream Geomorphic Correlations
+```{r}
+
+stream <- c("cv_elev", "std_elev", "avg_elev", "max_elev", "cv_slope", "std_slope", "avg_slope", "max_slope")
+Phab_stream <- Phab[stream]
+
+pairs(Phab_stream)
+
+res <- cor(Phab_stream)
+round(res,2)
+
+corrplot(res, type="upper", order="hclust",
+         tl.col="black", tl.srt=45)
+
+chart.Correlation(Phab_stream, histogram=TRUE, pch=19)
+
+#test for skewness
+geo_stream <- skewness(Phab_stream)
+View(geo_stream)
+
+```
+
+
+#Floodplain Correlations
+```{r}
+
+flood <- c("flood_elev", "flood_stdarea", "nd_max", "main_sinu", "flood_density", "flood_Tarea")
+Phab_flood <- Phab[flood]
+
+pairs(Phab_flood)
+
+res <- cor(Phab_flood)
+round(res,2)
+
+corrplot(res, type="upper", order="hclust",
+         tl.col="black", tl.srt=45)
+
+chart.Correlation(Phab_flood, histogram=TRUE, pch=19)
+
+#test for skewness
+geo_flood <- skewness(Phab_flood)
+View(geo_flood)
+```
+
+#Hydrology Correlations
+```{r}
+
+hydro <- c("avg_l_elev", "std_l_area", "area_lakes", "density_lakes", "n_lakes", "area_glac", "density_glac", "wetland", "wetland_HUC")
+Phab_hydro <- Phab[hydro]
+
+pairs(Phab_hydro)
+
+res <- cor(Phab_hydro)
+round(res,2)
+
+corrplot(res, type="upper", order="hclust",
+         tl.col="black", tl.srt=45)
+
+chart.Correlation(Phab_hydro, histogram=TRUE, pch=19)
+
+#test for skewness
+geo_hydro <- skewness(Phab_hydro)
+View(geo_hydro)
+
+```
+
+#Landcover Correlations
+```{r}
+
+land <- c("forest", "forest_HUC", "shrub_HUC", "bare_HUC", "area_glac", "wetland", "wetland_HUC")
+Phab_land <- Phab[land]
+
+pairs(Phab_land)
+
+res <- cor(Phab_land)
+round(res,2)
+
+corrplot(res, type="upper", order="hclust",
+         tl.col="black", tl.srt=45)
+
+#test for skewness
+geo_land <- skewness(Phab_land)
+View(geo_land)
+
+```
+
