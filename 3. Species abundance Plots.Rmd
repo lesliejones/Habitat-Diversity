@@ -1,0 +1,75 @@
+---
+title: "Species plots"
+author: "Leslie Jones"
+date: "February 19, 2019"
+output: html_document
+---
+
+```{r setup,include=FALSE, warning=FALSE, results='hide', message=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(readr)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(vegan)
+library(knitr)
+library(data.table)
+library(factoextra)
+library (colorspace)
+library (RColorBrewer)
+library(ggplot2)
+library(lattice)
+```
+
+## Species Abundance plots for SASAP Regions
+
+```{r, include=FALSE, warning=FALSE, results='hide', message=FALSE}
+#load data
+species <- read_csv("C:/Habitat_Diversity/Analysis/Data/Abundance_all.csv")
+View(species)
+```
+
+
+```{r}
+p <- ggplot(data=species, aes(x=SASAP.Region, y=meanCumAnnualCount, fill=SASAP.Region)) + geom_bar(stat = "identity") + facet_wrap(~Species) + theme(axis.text.x = element_text(angle = 90, hjust=1), legend.position = "none")
+
+p + facet_grid(Species ~., scale="free")
+
+```
+
+## Chinook plot without Southeast region since Southeast has much higher Abundance than other regions.
+```{r}
+chinook <- species %>% filter(Species=="chinook") %>% filter(!SASAP.Region=="Southeast")
+
+ggplot(data=chinook, aes(x=SASAP.Region, y=meanCumAnnualCount, fill=SASAP.Region)) + geom_bar(stat = "identity") +  theme(axis.text.x = element_text(angle = 90, hjust=1), legend.position = "none")
+```
+
+# Chum plot without Southeast region since Southeast has much higher Abundance than other regions.
+```{r}
+chum <- species %>% filter(Species=="chum") %>% filter(!SASAP.Region=="Southeast")
+
+ggplot(data=chum, aes(x=SASAP.Region, y=meanCumAnnualCount, fill=SASAP.Region)) + geom_bar(stat = "identity") +  theme(axis.text.x = element_text(angle = 90, hjust=1), legend.position = "none")
+```
+
+##Coho plot without Southeast region since Southeast has much higher Abundance than other regions.
+```{r}
+coho <- species %>% filter(Species=="coho") %>% filter(!SASAP.Region=="Southeast")
+
+ggplot(data=coho, aes(x=SASAP.Region, y=meanCumAnnualCount, fill=SASAP.Region)) + geom_bar(stat = "identity") +  theme(axis.text.x = element_text(angle = 90, hjust=1), legend.position = "none")
+```
+
+##Pink plot without Southeast region since Southeast has much higher Abundance than other regions.
+```{r}
+pink <- species %>% filter(Species=="pink") %>% filter(!SASAP.Region=="Southeast")
+
+ggplot(data=pink, aes(x=SASAP.Region, y=meanCumAnnualCount, fill=SASAP.Region)) + geom_bar(stat = "identity") +  theme(axis.text.x = element_text(angle = 90, hjust=1), legend.position = "none")
+```
+
+
+##Sockeye plot without Southeast region since Bristol Bay has much higher Abundance than other regions. 
+```{r}
+sockeye <- species %>% filter(Species=="sockeye") %>% filter(!SASAP.Region=="Bristol Bay")
+
+ggplot(data=sockeye, aes(x=SASAP.Region, y=meanCumAnnualCount, fill=SASAP.Region)) + geom_bar(stat = "identity") +  theme(axis.text.x = element_text(angle = 90, hjust=1), legend.position = "none")
+```

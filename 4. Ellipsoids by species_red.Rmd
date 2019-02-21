@@ -32,9 +32,9 @@ setwd ("C:/Habitat_Diversity/Analysis")
 
 ```
 
-##Data management
-```{r warning=FALSE, results='hide', message=FALSE}
 
+```{r, warning=FALSE, results='hide', message=FALSE}
+##Data management
 #load data
 Phab <- read_csv("C:/Habitat_Diversity/Analysis/Data/Phab_HUClevel_NEW.csv")
 #View(Phab)
@@ -105,41 +105,15 @@ apply(Phab3[,!names(Phab3) %in% exclude], 2, is.numeric)
 Phabm <- Phab3[complete.cases(Phab3),] 
 ```
 
+
+```{r}
 ##PCA Analysis
-Following methodology from: http://www.sthda.com/english/articles/31-principal-component-methods-in-r-practical-guide/118-principal-component-analysis-in-r-prcomp-vs-princomp/
-and http://www.sthda.com/english/articles/31-principal-component-methods-in-r-practical-guide/112-pca-principal-component-analysis-essentials/
-```{r warning=FALSE, results='hide', message=FALSE}
 
 # need to scale and center data
 Phab_z<-scale(Phabm[,!names(Phabm) %in% exclude], scale=TRUE, center=TRUE)
 
 #compute PCA - all data
 res.pca <- prcomp(Phab_z, scale = FALSE)
-
-#vector arrows by phab
-fviz_pca_var(res.pca,
-             col.var = "contrib", # Color by contributions to the PC
-             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-             repel = FALSE     # Avoid text overlapping
-)
-
-#scree plot of eigenvalues - variance explained by each PC
-fviz_eig(res.pca, addlabels = TRUE, ylim = c(0,40))
-
-#visualize the cos2 of variables
-var <- get_pca_var(res.pca)
-corrplot(var$cos2, is.corr = FALSE)
-
-# Total cos2 of variables on Dim.1 and Dim.2
-fviz_cos2(res.pca, choice = "var", axes = 1:2)
-
-# Contributions of variables to PC1
-fviz_contrib(res.pca, choice = "var", axes = 1, top = 10)
-# Contributions of variables to PC2
-fviz_contrib(res.pca, choice = "var", axes = 2, top = 10)
-# Contributions of variables to PC3
-fviz_contrib(res.pca, choice = "var", axes = 3, top = 10)
-
 
 #pc1 is a tibble of all pc scores for 170 hucs.
 pcscores <- as.tibble(scores(res.pca))
@@ -155,53 +129,16 @@ pcout <- cbind(Phab3$region, Phab3$id_numeric, Phab3$region_id, pcscores)
 
 ```
 
-##PCA Plots
-```{r warning=FALSE, message=FALSE}
-#graph 
-fviz_pca_ind(res.pca,
-             col.ind = "cos2", # Color by the quality of representation
-             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-             repel = TRUE     # Avoid text overlapping
-)
+# Habitat by Species
+Abundance estimates were provided from SASAP work - found here: https://pages.github.nceas.ucsb.edu/NCEAS/sasap-data/
 
-#individuals by region
-fviz_pca_ind(res.pca,
-             col.ind = Phabm$region, # color by groups
-             palette = ("rainbow_hcl"),
-             addEllipses =FALSE,
-             legend.title = "Groups",
-             repel = TRUE
-)
-
-#individuals by region with ellipse
-fviz_pca_ind(res.pca,
-             col.ind = Phabm$region, # color by groups
-             palette = ("rainbow_hcl"),
-             addEllipses =TRUE,
-             legend.title = "Groups",
-             repel = TRUE
-)
-#pc 1 and 2 with points colored and shaped by region, ellipses around regions 
-#habillage can be changed to display other factor variables - e.g. variable type.
-
-fviz_pca_ind(res.pca, geom.ind = "point", axes = c(1,2), 
-             repel = TRUE, habillage = Phabm$region, addEllipses = FALSE)
-
-fviz_pca_ind(res.pca, geom.ind = "point", axes = c(1,2), 
-             repel = TRUE, habillage = Phabm$region, addEllipses = TRUE)
-
-fviz_pca_biplot(res.pca, geom.ind = "point", axes = c(1,2), 
-                repel = TRUE, habillage = Phabm$region, addEllipses = TRUE)
-
-fviz_pca_biplot(res.pca, geom.ind = "none", axes = c(1,2), 
-                repel = TRUE, habillage = Phabm$region, addEllipses = TRUE)
+![Abundance by region](C:/Habitat_Diversity/Analysis/Images/salmond_abundance by region.png)
 
 
-```
+##Chinook Regions
+Highest Abundance of chinook salmon are found in the Bristol Bay, Cook Inlet, Kuskokwim, Southeast, and Yukon regions.
 
-
-```{r warning=FALSE, message=FALSE}
-
+```{r}
 #F8766D
 #B79F00
 #00BA38
@@ -210,37 +147,46 @@ fviz_pca_biplot(res.pca, geom.ind = "none", axes = c(1,2),
 #F564E3
 
 #select ellipsoids
-# Aleutian, Arctic only
-fviz_pca_biplot(res.pca, geom.ind = "point", axes = c(1,2), 
-                repel = TRUE, habillage = Phabm$region, addEllipses = TRUE,
-                palette = c( "white", "#F8766D", rep("white",11)))
+# SE, Kusko BB, CI, Yukon
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c(rep("white",2), "red2", "white", "red2", rep("white",3), "red2", "white", "white", "red2","red2"))
+                
+```
 
-#Aleutian, Arctic add Yukon
-fviz_pca_biplot(res.pca, geom.ind = "point", axes = c(1,2), 
-                repel = TRUE, habillage = Phabm$region, addEllipses = TRUE,
-                palette = c( "#B79F00", "#F8766D", rep("white",10), "#00BA38"))
-
-#Aleutian, Arctic add Yukon add kuskokwim add kotzebue
-fviz_pca_biplot(res.pca, geom.ind = "point", axes = c(1,2), 
-                repel = TRUE, habillage = Phabm$region, addEllipses = TRUE,
-                palette = c( "#B79F00", "#F8766D", rep("white",5),"#619CFF", "#00BFC4", rep("white",3), "#00BA38"))
-
-# Aleutian, Arctic add Yukon add kuskokwim add kotzebue add Norton Sound
-fviz_pca_biplot(res.pca, geom.ind = "point", axes = c(1,2), 
-                repel = TRUE, habillage = Phabm$region, addEllipses = TRUE,
-                palette = c( "#B79F00", "#F8766D", rep("white",5),"#619CFF", "#00BFC4", "#F564E3", rep("white",2), "#00BA38"))
-
-#other similar systems
-# Cook Inlet and Bristol Bay copper and southest and PWS
-fviz_pca_biplot(res.pca, geom.ind = "point", axes = c(1,2), 
-                repel = TRUE, habillage = Phabm$region, addEllipses = TRUE,
-                palette = c( "mediumpurple1", "white", "#B79F00", "white", "#F8766D", "#619CFF", rep("white",4),
-                             "yellow3", "#00BFC4", "white"))
+##Sockeye Regions
+Highest Abundance of sockeye salmon are found in the Aleutian Island, Bristol Bau, Cook Inlet, and Kodiak regions.
 
 
+```{r}
+#fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = #Phabm$region, addEllipses = FALSE, palette = c("#F564E3", "white", "#619CFF", "white", "#F8766D", "white", "#B79F00", #rep("white",6))) 
 
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c("red2", "white", "red2", "white", "red2", "white", "red2", rep("white",6)))
+              
+```
 
+##Chum Regions
+Highest Abundance of Chum salmon are found in the Southeast, Yukon, and Prince William Sound regions.
+ 
+```{r}
+
+#select ellipsoids
+# SE, Yukon, PWS
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c(rep("white", 10), "red2", "red2", "red2"))
+
+```
+  
+##Pink Regions
+Highest Abundance of pink salmon are found in the Southeast, Kodiak, and Prince William Sound regions.
+
+```{r}
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c(rep("white", 6), "red2", rep("white", 3),"red2", "red2", "white"))
 
 ```
 
+##Coho Regions
+Highest Abundance of coho salmon are found in the Southeast, Cook Inlet, Copper River, and Kodiak regions.
 
+```{r}
+
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c(rep("white", 4), rep("red2", 3), rep("white", 4),"red2", "white"))
+
+```
