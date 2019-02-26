@@ -126,6 +126,11 @@ fviz_pca_var(res.pca,
 #scree plot of eigenvalues - variance explained by each PC
 fviz_eig(res.pca, addlabels = TRUE, ylim = c(0,40))
 
+#Description of dimension 1
+#dimdesc(res.pca)
+#res.desc <- dimdesc(res.pca, axes = 1:2, proba = 0.05)
+#res.desc$Dim.1
+
 #visualize the cos2 of variables
 var <- get_pca_var(res.pca)
 corrplot(var$cos2, is.corr = FALSE)

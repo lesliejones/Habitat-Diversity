@@ -1,0 +1,135 @@
+---
+title: "5. Species Distributions Plots.Rmd"
+author: "Leslie Jones"
+date: "February 25, 2019"
+output: html_document
+---
+
+
+```{r setup, include=FALSE, warning=FALSE, results='hide', message=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(readr)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(psych)
+library(FactoMineR)
+library(ade4)
+library(amap)
+library(vegan)
+library(knitr)
+library(reshape2)
+library(MASS)
+library(data.table)
+library(factoextra)
+library (colorspace)
+library (RColorBrewer)
+library(ggplot2)
+library(lattice)
+library(readr)
+library (corrplot)
+library(moments)
+setwd ("C:/Habitat_Diversity/Analysis")
+
+```
+
+##Species Distribution Data by SASAP Regions
+
+```{r, warning=FALSE, results='hide', message=FALSE}
+#load data
+coho <- read_csv("C:/Habitat_Diversity/Analysis/Data/coho_regions.txt")
+coho$Species = "coho"
+coho$habitat = (coho$coho_km/coho$area_km2)
+coho2 <- subset(coho, select = c(region, habitat, Species)) 
+#View (coho2)
+
+pink <- read_csv("C:/Habitat_Diversity/Analysis/Data/pink_regions.txt")
+pink$Species = "pink"
+pink$habitat = (pink$pink_km/pink$area_km2)
+pink2 <- subset(pink, select = c(region, habitat, Species)) 
+
+chinook <- read_csv("C:/Habitat_Diversity/Analysis/Data/chinook_regions.txt")
+chinook$Species = "chinook"
+chinook$habitat = (chinook$chinook_km/chinook$area_km2)
+chinook2 <- subset(chinook, select = c(region, habitat, Species)) 
+
+sockeye <- read_csv("C:/Habitat_Diversity/Analysis/Data/sockeye_regions.txt")
+sockeye$Species = "sockeye"
+sockeye$habitat = (sockeye$sockeye_km/sockeye$area_km2)
+sockeye2 <- subset(sockeye, select = c(region, habitat, Species)) 
+
+chum <- read_csv("C:/Habitat_Diversity/Analysis/Data/chum_regions.txt")
+chum$Species = "chum"
+chum$habitat = (chum$chum_km/chum$area_km2)
+chum2 <- subset(chum, select = c(region, habitat, Species)) 
+
+regions <- rbind (coho2, pink2, sockeye2,chum2, chinook2)
+
+#View(regions)
+
+#test for skewness
+reg1 <- subset(regions, select = c(habitat))
+reg <- skewness(reg1)
+View(reg)
+
+#log transform
+regions$habitat_log <- log(regions$habitat +1)
+
+```
+
+```{r}
+p <- ggplot(data=regions, aes(x=region, y=habitat_log, fill=region)) + geom_bar(stat = "identity") + facet_wrap(~Species) + theme(axis.text.x = element_text(angle = 90, hjust=1), legend.position = "none")
+
+p + facet_grid(Species ~.)
+
+q <- ggplot(data=regions, aes(x=region, y=habitat, fill=region)) + geom_bar(stat = "identity") + facet_wrap(~Species) + theme(axis.text.x = element_text(angle = 90, hjust=1), legend.position = "none")
+
+q + facet_grid(Species ~.)
+
+```
+#Species Distributions by HUC for PCA plots
+```{r, warning=FALSE, results='hide', message=FALSE}
+#load data
+coho_huc <- read_csv("C:/Habitat_Diversity/Analysis/Data/coho_hucs.txt")
+coho_huc$coho_hab = (coho_huc$coho_km/coho_huc$huc_km2)
+coho2_huc <- subset(coho_huc, select = c(id_numeric, coho_hab, coho_km)) 
+View (coho2_huc)
+
+pink_huc <- read_csv("C:/Habitat_Diversity/Analysis/Data/pink_hucs.txt")
+pink_huc$pink_hab = (pink_huc$pink_km/pink_huc$huc_km2)
+pink2_huc <- subset(pink_huc, select = c(id_numeric, pink_hab, pink_km)) 
+
+chinook_huc <- read_csv("C:/Habitat_Diversity/Analysis/Data/chinook_hucs.txt")
+chinook_huc$chinook_hab = (chinook_huc$chinook_km/chinook_huc$huc_km2)
+chinook2_huc <- subset(chinook_huc, select = c(id_numeric, chinook_hab, chinook_km)) 
+
+sockeye_huc <- read_csv("C:/Habitat_Diversity/Analysis/Data/sockeye_hucs.txt")
+sockeye_huc$sockeye_hab = (sockeye_huc$sockeye_km/sockeye_huc$huc_km2)
+sockeye2_huc <- subset(sockeye_huc, select = c(id_numeric, sockeye_hab, sockeye_km)) 
+
+chum_huc <- read_csv("C:/Habitat_Diversity/Analysis/Data/chum_hucs.txt")
+chum_huc$chum_hab = (chum_huc$chum_km/chum_huc$huc_km2)
+chum2_huc <- subset(chum_huc, select = c(id_numeric, chum_hab, chum_km)) 
+
+#full huc list to merge on
+fullhuc <- read_csv("C:/Habitat_Diversity/Analysis/Data/Huc_areas_ID.txt")
+fullhuc2 <- subset(fullhuc, select=c(id_numeric))
+
+#left join on full huc list
+huc <- left_join(fullhuc2, coho2_huc, by= c("id_numeric")) 
+huc2 <- left_join(huc, pink2_huc, by= c("id_numeric")) 
+huc3 <- left_join(huc2, sockeye2_huc, by= c("id_numeric")) 
+huc4 <- left_join(huc3, chum2_huc, by= c("id_numeric"))
+huc5 <- left_join(huc4, chinook2_huc, by= c("id_numeric"))
+View(huc5)
+write.csv(huc5, file = "C:/Habitat_Diversity/Analysis/Data/Huc_habitat.csv")
+
+#test for skewness
+#huc1 <- subset(hucs, select = c(pink_hab, chinook_hab, sockeye_hab, chum_hab, coho_hab))
+#huc <- skewness(huc1)
+#View(huc)
+
+
+```
+

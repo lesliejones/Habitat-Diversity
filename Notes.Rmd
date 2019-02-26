@@ -1,0 +1,28 @@
+---
+title: "5. Total Habitat"
+author: "Leslie Jones"
+date: "February 22, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+1) DONE - Use Species distributions to calculate total habitat by species (and life-histories) for HUCs.
+
+ - Yukon does not have life-history? so by species only
+ 
+Standardize by HUC size. test skewness for log-transformation?
+Rescale to size points or just color highest to lowest (gradient).
+
+Yes AWC is biased - color those HUCS with data and then overlay all other HUCS in lighter transparencies - HUCs with similar characteristics as those with most importance could be used to "prioritize" field efforts and target research and monitoring
+
+2) Summarize Imporant indicators by region to show difference across regions (example: range of slope) - help with talking about how regions are different and how certain characteristics make each one unique
+ 
+3) rotate loading space?
+
+4) Abundance estimates - standardize by size of region
+   - log-transform
+   -rescale to visualize points by size or color on gradient scale
+

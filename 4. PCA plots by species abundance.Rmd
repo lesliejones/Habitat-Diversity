@@ -129,7 +129,7 @@ pcout <- cbind(Phab3$region, Phab3$id_numeric, Phab3$region_id, pcscores)
 
 ```
 
-# Habitat by Species
+# Species Abundance
 Abundance estimates were provided from SASAP work - found here: https://pages.github.nceas.ucsb.edu/NCEAS/sasap-data/
 
 ![Abundance by region](C:/Habitat_Diversity/Analysis/Images/salmond_abundance by region.png)
@@ -148,7 +148,7 @@ Highest Abundance of chinook salmon are found in the Bristol Bay, Cook Inlet, Ku
 
 #select ellipsoids
 # SE, Kusko BB, CI, Yukon
-fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c(rep("white",2), "red2", "white", "red2", rep("white",3), "red2", "white", "white", "red2","red2"))
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c(rep("white",1), "yellow2", "red2", "white", "red2", rep("white",3), "red2", "white", "white", "red2","red2"))
                 
 ```
 
@@ -159,7 +159,7 @@ Highest Abundance of sockeye salmon are found in the Aleutian Island, Bristol Ba
 ```{r}
 #fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = #Phabm$region, addEllipses = FALSE, palette = c("#F564E3", "white", "#619CFF", "white", "#F8766D", "white", "#B79F00", #rep("white",6))) 
 
-fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c("red2", "white", "red2", "white", "red2", "white", "red2", rep("white",6)))
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c("red2", "yellow2", "red2", "white", "red2", "white", "red2", rep("white",6)))
               
 ```
 
@@ -170,7 +170,7 @@ Highest Abundance of Chum salmon are found in the Southeast, Yukon, and Prince W
 
 #select ellipsoids
 # SE, Yukon, PWS
-fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c(rep("white", 10), "red2", "red2", "red2"))
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c("white", "yellow2", rep("white", 8), "red2", "red2", "red2"))
 
 ```
   
@@ -178,7 +178,7 @@ fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", 
 Highest Abundance of pink salmon are found in the Southeast, Kodiak, and Prince William Sound regions.
 
 ```{r}
-fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c(rep("white", 6), "red2", rep("white", 3),"red2", "red2", "white"))
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c("white", "yellow2", rep("white", 4), "red2", rep("white", 3),"red2", "red2", "white"))
 
 ```
 
@@ -187,6 +187,6 @@ Highest Abundance of coho salmon are found in the Southeast, Cook Inlet, Copper 
 
 ```{r}
 
-fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c(rep("white", 4), rep("red2", 3), rep("white", 4),"red2", "white"))
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phabm$region, addEllipses = FALSE, palette = c("white", "yellow2", rep("white", 2), rep("red2", 3), rep("white", 4),"red2", "white"))
 
 ```
