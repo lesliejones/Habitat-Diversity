@@ -122,11 +122,15 @@ View(pcscores)
 #add huc and region to the pc scores.
 pcout <- cbind(Phab3$region, Phab3$id_numeric, Phab3$region_id, Phab3$pink_hab, Phab3$coho_hab, Phab3$sockeye_hab, 
                Phab3$coho_hab, Phab3$chum_hab,pcscores)
-#View(pcout)
 
+pcout <- cbind(Phab3,pcscores)
+View(pcout)
+# get variable
+var <- get_pca_var(res.pca)
+View(var$cos2)
 
 #export csv with scores by huc and region
-#write.csv(pcout, file="PCscores_huc_region.csv")
+write.csv(pcout, file="C:/Habitat_Diversity/Analysis/Data/PCscores_huc.csv")
 
 
 ```
@@ -214,18 +218,19 @@ View(x11)
 fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=(x11), geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phab3$region, addEllipses = FALSE)
 
 #set NA hucs to a value so that can be visualized on map
-x2 <- Phab3 %>% pull(coho_hab) %>%replace_na(0)
+x2 <- Phab3 %>% pull(coho_hab) 
 x2 [x2>0] <- 1 
-#View(x2)
+x4 <- x2 %>% replace_na(0)
+View(x4)
 
 x3 <- Phab3 %>% pull(coho_hab) 
 x31 <- scales::rescale(x3, to=c(1,10)) %>% replace_na(1)
 
 View(x31)
 
-fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, addEllipses = FALSE)
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x4, addEllipses = FALSE, invisible = "quali")
 
-fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, addEllipses = FALSE)
+#fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x4, #addEllipses = FALSE)
                 
 ```
 
@@ -235,7 +240,7 @@ Standardized habitat totals by HUC.
 ```{r}
 x1 <- Phab3 %>% pull(chinook_hab) 
 x11 <- scales::rescale(x1, to=c(1,10))
-View(x11)
+#View(x11)
 
 fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=(x11), geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phab3$region, addEllipses = FALSE)
 
@@ -247,11 +252,11 @@ x2 [x2>0] <- 1
 x3 <- Phab3 %>% pull(chinook_hab) 
 x31 <- scales::rescale(x3, to=c(1,10)) %>% replace_na(1)
 
-View(x31)
+#View(x31)
 
-fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, addEllipses = FALSE)
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point", col.ind=as.factor(x2), axes = c(1,2), repel = TRUE, habillage = "none", addEllipses = FALSE, invisible = "quali")
 
-fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, addEllipses = FALSE)
+#fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, #addEllipses = FALSE)
 ```
 
 
@@ -277,9 +282,9 @@ x31 <- scales::rescale(x3, to=c(1,10)) %>% replace_na(1)
 
 View(x31)
 
-fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, addEllipses = FALSE)
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, addEllipses = FALSE, invisible = "quali")
 
-fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, addEllipses = FALSE)
+#fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, #addEllipses = FALSE)
      
 ```
 
@@ -303,19 +308,20 @@ x31 <- scales::rescale(x3, to=c(1,10)) %>% replace_na(1)
 
 View(x31)
 
-fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, addEllipses = FALSE)
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, addEllipses = FALSE, invisible = "quali")
 
-fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, addEllipses = FALSE)
+#fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, #addEllipses = FALSE)
 ```     
 
 ##Hucs sized by Chum habitat
 Standardized habitat totals by HUC.
 
 ```{r}
-x1 <- Phab3 %>% pull(chum_hab) 
-x11 <- scales::rescale(x1, to=c(1,10))
-#View(x11)
-#fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=(x11), geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = #Phab3$region, addEllipses = FALSE)
+y1 <- Phab3 %>% pull(chum_hab) 
+y11 <- scales::rescale(x1, to=c(1,10)) %>% replace_na(0)
+View(y11)
+
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=y11, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phab3$region, addEllipses = FALSE)
 
 #set NA hucs to a value so that can be visualized on map
 x2 <- Phab3 %>% pull(chum_hab) %>%replace_na(0)
@@ -327,7 +333,7 @@ x31 <- scales::rescale(x3, to=c(1,10)) %>% replace_na(1)
 
 #View(x31)
 
-fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, addEllipses = FALSE)
+fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, addEllipses = FALSE, invisible = "quali")
 
 #fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=3, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, #addEllipses = FALSE)
 ```
