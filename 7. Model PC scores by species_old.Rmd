@@ -1,0 +1,206 @@
+---
+title: "Model PC Scores"
+author: "Leslie Jones"
+date: "February 27, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning=FALSE, results='hide', message=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(readr)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(psych)
+library(FactoMineR)
+library(ade4)
+library(amap)
+library(vegan)
+library(knitr)
+library(reshape2)
+library(MASS)
+library(data.table)
+library(factoextra)
+library (colorspace)
+library (RColorBrewer)
+library(ggplot2)
+library(lattice)
+library(readr)
+library (corrplot)
+library(car)
+setwd ("C:/Habitat_Diversity/Analysis")
+
+```
+
+
+##Model for Chinook
+
+```{r}
+#load data
+pca <- read_csv("C:/Habitat_Diversity/Analysis/Data/pcscores_huc.csv")
+chinook <- pca[complete.cases(pca$chinook_hab),]
+
+#View(chinook1)
+#skew2 <- skewness(chinook1)
+#View(skew2)
+
+fit <- lm(chinook_hab ~ slope_avgW +  elev_avgW + wetland + ccomplexity + sinuosity + flood_elev + lake_elev + elev_avgS + elev_cvS + slope_avgS + slope_cvS + slope_cvW + glacierA + floodplainA + lakeD + forest + shrub , data = chinook)
+
+step <- stepAIC(fit, direction="both")
+step$anova
+
+summary (step)
+
+# use best fit model and reduce multicollinear variables
+vif(lm(chinook_hab ~ slope_avgW + ccomplexity + sinuosity + flood_elev + lake_elev + elev_avgS + elev_cvS + slope_avgS +
+            slope_cvS + slope_cvW + glacierA + forest + shrub , data = chinook))
+
+myvars <- c("slope_avgW", "ccomplexity", "sinuosity", "flood_elev", "lake_elev", "elev_avgS", "elev_cvS", "slope_avgS",           
+"slope_cvS", "slope_cvW", "glacierA", "forest", "shrub")
+ch3 <- chinook[myvars] 
+res <- cor(ch3)
+round(res,2)
+write.csv(res, file="C:/Habitat_Diversity/Analysis/Data/corr_chinook.csv")
+
+# remove slope_cvS
+fit2 <- lm(chinook_hab ~     sinuosity  + elev_cvS  +
+             slope_cvW  + forest + shrub, data = chinook)
+
+summary (fit2)
+
+
+vif(lm(chinook_hab ~  sinuosity   + elev_cvS  +
+             slope_cvW  + forest + shrub , data = chinook))
+
+#predict on full dataframe
+chinook_pred <- predict(fit2, pca)
+chinook_out <- cbind(pca,chinook_pred) 
+chinook_out$chinook_pred2=(chinook_out$chinook_pred*100)
+chinook_out$chinook_hab2 = (chinook_out$chinook_hab*100)
+View(chinook_out)
+
+ggplot(chinook_out, aes(x=chinook_pred, y=chinook_hab)) + geom_point()
+
+
+write.csv(chinook_out, file="C:/Habitat_Diversity/Analysis/Data/pred_chinook.csv")
+```
+##Model for Sockeye
+
+```{r}
+#load data
+sock <- pca[complete.cases(pca$sockeye_hab),]
+
+fits <- lm(sockeye_hab ~ slope_avgW +  elev_avgW + wetland + ccomplexity + sinuosity + flood_elev + lake_elev + elev_avgS + elev_cvS + slope_avgS + slope_cvS + slope_cvW + glacierA + floodplainA + lakeD + forest + shrub , data = sock)
+
+step2s <- stepAIC(fits, direction="both")
+step2s$anova
+
+summary (step2s)
+
+fits2 <- lm(sockeye_hab ~ slope_avgW  + wetland + slope_avgS  + lakeD  + shrub , data = sock)
+
+summary (fits2)
+
+vif(lm(sockeye_hab ~ slope_avgW  + wetland + slope_avgS  + lakeD  + shrub, data = sock))
+
+
+#predict on full dataframe
+sock_pred <- predict(fits2, pca)
+sock_out <- cbind(pca,sock_pred) 
+sock_out$sock_pred2=(sock_out$sock_pred*100)
+sock_out$sock_hab2 = (sock_out$sock_hab*100)
+View(sock_out)
+
+ggplot(sock_out, aes(x=sock_pred2, y=sock_hab2)) + geom_point()
+
+
+write.csv(sock_out, file="C:/Habitat_Diversity/Analysis/Data/pred_sock.csv")
+```
+
+##Model for Chum
+
+```{r}
+#load data
+chum <- pca[complete.cases(pca$chum_hab),]
+
+fitc <- lm(chum_hab ~ slope_avgW +  elev_avgW + wetland + ccomplexity + sinuosity + flood_elev + lake_elev + elev_avgS + elev_cvS + slope_avgS + slope_cvS + slope_cvW + glacierA + floodplainA + lakeD + forest + shrub, data = chum)
+
+step3c <- stepAIC(fitc, direction="both")
+step3c$anova
+summary (step3c)
+
+fit2c <- lm(chum_hab ~ slope_avgW +  elev_avgW + ccomplexity + elev_avgS + elev_cvS + slope_avgS  + floodplainA  + forest + shrub, data = chum)
+
+summary (fit2c)
+
+vif(lm(sockeye_hab ~ slope_avgW  + wetland + slope_avgS  + lakeD  + shrub, data = chum))
+
+#predict on full dataframe
+chum_pred <- predict(step3c, pca)
+chum_out <- cbind(pca,chum_pred) 
+chum_out$chum_pred2=(chum_out$chum_pred*100)
+chum_out$chum_hab2 = (chum_out$chum_hab*100)
+View(chum_out)
+
+ggplot(chum_out, aes(x=chum_pred2, y=chum_hab2)) + geom_point()
+
+
+write.csv(chum_out, file="C:/Habitat_Diversity/Analysis/Data/pred_chum.csv")
+```
+
+##Model for pink
+
+```{r}
+#load data
+pink <- pca[complete.cases(pca$pink_hab),]
+
+fit <- lm(pink_hab ~ Avg_slope_stream + Avg_Elevation_Stream + wetland_HUC + Channel_Complexity + River_Sinuosity + Floodplain_elev + Avg_lake_elev + Avg_Elevation_HUC + CV_elevation_HUC + Avg_slope_HUC + CV_Slope_HUC + CV_Slope_Stream + Glacier_Area + Floodplain_Area + Density_lakes + forest_HUC + Shrub + wetland_HUC, data = pink)
+
+step4 <- stepAIC(fit, direction="both")
+step4$anova
+
+summary (step4)
+
+#predict on full dataframe
+pink_pred <- predict(step4, pca)
+pink_out <- cbind(pca,pink_pred) 
+pink_out$pink_pred2=(pink_out$pink_pred*100)
+pink_out$pink_hab2 = (pink_out$pink_hab*100)
+View(pink_out)
+
+ggplot(pink_out, aes(x=pink_pred2, y=pink_hab2)) + geom_point()
+
+
+write.csv(pink_out, file="C:/Habitat_Diversity/Analysis/Data/pred_pink.csv")
+```
+
+##Model for coho
+
+```{r}
+#load data
+coho <- pca[complete.cases(pca$coho_hab),]
+exclude <- c("name", "region")
+co<- coho[,!names(coho) %in% exclude]
+View (co)
+
+coho1 <- normalize(c, method="standardize", margin=2)
+fit <- lm(coho_hab ~ Avg_slope_stream + Avg_Elevation_Stream + wetland_HUC + Channel_Complexity + River_Sinuosity + Floodplain_elev + Avg_lake_elev + Avg_Elevation_HUC + CV_elevation_HUC + Avg_slope_HUC + CV_Slope_HUC + CV_Slope_Stream + Glacier_Area + Floodplain_Area + Density_lakes + forest_HUC + Shrub + wetland_HUC, data = coho1)
+
+step5 <- stepAIC(fit, direction="both")
+step5$anova
+
+summary (step5)
+
+#predict on full dataframe
+coho_pred <- predict(step5, pca)
+coho_out <- cbind(pca,coho_pred) 
+coho_out$coho_pred2=(coho_out$coho_pred*100)
+coho_out$coho_hab2 = (coho_out$coho_hab*100)
+View(coho_out)
+
+ggplot(coho_out, aes(x=coho_pred2, y=coho_hab2)) + geom_point()
+
+
+write.csv(coho_out, file="C:/Habitat_Diversity/Analysis/Data/pred_coho.csv")
+```
