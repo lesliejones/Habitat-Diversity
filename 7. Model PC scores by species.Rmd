@@ -28,9 +28,11 @@ library(ggplot2)
 library(lattice)
 library(readr)
 library (corrplot)
+library(car)
 setwd ("C:/Habitat_Diversity/Analysis")
 
 ```
+
 
 ##Model for Chinook
 
@@ -38,23 +40,46 @@ setwd ("C:/Habitat_Diversity/Analysis")
 #load data
 pca <- read_csv("C:/Habitat_Diversity/Analysis/Data/pcscores_huc.csv")
 chinook <- pca[complete.cases(pca$chinook_hab),]
-View (chinook)
 
-fit <- lm(chinook_hab ~ Avg_slope_stream + Avg_Elevation_Stream + wetland_HUC + Channel_Complexity + River_Sinuosity + Floodplain_elev + Avg_lake_elev + Avg_Elevation_HUC + CV_elevation_HUC + Avg_slope_HUC + CV_Slope_HUC + CV_Slope_Stream + Glacier_Area + Floodplain_Area + Density_lakes + forest_HUC + Shrub + wetland_HUC, data = chinook)
+#View(chinook1)
+#skew2 <- skewness(chinook1)
+#View(skew2)
+
+fit <- lm(chinook_hab ~ slope_avgW + elev_avgW + wetland + ccomplexity + sinuosity + flood_elev + lake_elev + elev_avgS + elev_cvS + slope_avgS + slope_cvS + slope_cvW + glacierA + floodplainA + lakeD + forest + shrub , data = chinook)
 
 step <- stepAIC(fit, direction="both")
 step$anova
 
 summary (step)
 
+vif(lm(chinook_hab ~ slope_avgW + ccomplexity + sinuosity + flood_elev + lake_elev + elev_avgS + elev_cvS + slope_avgS +
+            slope_cvS + slope_cvW + glacierA + forest + shrub , data = chinook))
+
+myvars <- c("slope_avgW", "ccomplexity", "sinuosity", "flood_elev", "lake_elev", "elev_avgS", "elev_cvS", "slope_avgS",           
+"slope_cvS", "slope_cvW", "glacierA", "forest", "shrub")
+ch3 <- chinook[myvars] 
+res <- cor(ch3)
+round(res,2)
+write.csv(res, file="C:/Habitat_Diversity/Analysis/Data/corr_chinook.csv")
+
+# second mondel
+fit2 <- lm(chinook_hab ~   ccomplexity + sinuosity +  lake_elev +  elev_cvS + slope_avgS +
+            slope_cvS  +  forest + shrub, data = chinook)
+
+summary (fit2)
+
+
+vif(lm(chinook_hab ~  ccomplexity + sinuosity +  lake_elev +  elev_cvS + slope_avgS +
+            slope_cvS  + forest + shrub , data = chinook))
+
 #predict on full dataframe
-chinook_pred <- predict(step, pca)
+chinook_pred <- predict(fit2, pca)
 chinook_out <- cbind(pca,chinook_pred) 
 chinook_out$chinook_pred2=(chinook_out$chinook_pred*100)
 chinook_out$chinook_hab2 = (chinook_out$chinook_hab*100)
 View(chinook_out)
 
-ggplot(chinook_out, aes(x=chinook_pred2, y=chinook_hab2)) + geom_point()
+ggplot(chinook_out, aes(x=chinook_pred, y=chinook_hab)) + geom_point()
 
 
 write.csv(chinook_out, file="C:/Habitat_Diversity/Analysis/Data/pred_chinook.csv")
@@ -64,14 +89,19 @@ write.csv(chinook_out, file="C:/Habitat_Diversity/Analysis/Data/pred_chinook.csv
 ```{r}
 #load data
 sock <- pca[complete.cases(pca$sockeye_hab),]
-View (sock)
 
-fit <- lm(sock_hab ~ Avg_slope_stream + Avg_Elevation_Stream + wetland_HUC + Channel_Complexity + River_Sinuosity + Floodplain_elev + Avg_lake_elev + Avg_Elevation_HUC + CV_elevation_HUC + Avg_slope_HUC + CV_Slope_HUC + CV_Slope_Stream + Glacier_Area + Floodplain_Area + Density_lakes + forest_HUC + Shrub + wetland_HUC, data = sock)
+fits <- lm(sockeye_hab ~ slope_avgW + elev_avgW + wetland + ccomplexity + sinuosity + flood_elev + lake_elev + elev_avgS + elev_cvS + slope_avgS + slope_cvS + slope_cvW + glacierA + floodplainA + lakeD + forest + shrub , data = sock)
 
-step2 <- stepAIC(fit, direction="both")
-step2$anova
+step2s <- stepAIC(fits, direction="both")
+step2s$anova
 
-summary (step2)
+summary (step2s)
+
+vif(lm(sockeye_hab ~ slope_avgW + elev_avgW + wetland + ccomplexity + sinuosity + flood_elev + lake_elev + elev_avgS + elev_cvS + slope_avgS + slope_cvS + slope_cvW + glacierA + floodplainA + lakeD + forest + shrub , data = sock))
+
+
+fits2 <- lm(sockeye_hab ~ slope_avgW + elev_avgW + wetland + ccomplexity + sinuosity + flood_elev + lake_elev + elev_avgS + elev_cvS + slope_avgS + slope_cvS + slope_cvW + glacierA + floodplainA + lakeD + forest + shrub , data = sock)
+
 
 #predict on full dataframe
 sock_pred <- predict(step2, pca)
@@ -91,7 +121,6 @@ write.csv(sock_out, file="C:/Habitat_Diversity/Analysis/Data/pred_sock.csv")
 ```{r}
 #load data
 chum <- pca[complete.cases(pca$chum_hab),]
-View (chum)
 
 fit <- lm(chum_hab ~ Avg_slope_stream + Avg_Elevation_Stream + wetland_HUC + Channel_Complexity + River_Sinuosity + Floodplain_elev + Avg_lake_elev + Avg_Elevation_HUC + CV_elevation_HUC + Avg_slope_HUC + CV_Slope_HUC + CV_Slope_Stream + Glacier_Area + Floodplain_Area + Density_lakes + forest_HUC + Shrub + wetland_HUC, data = chum)
 
@@ -118,7 +147,6 @@ write.csv(chum_out, file="C:/Habitat_Diversity/Analysis/Data/pred_chum.csv")
 ```{r}
 #load data
 pink <- pca[complete.cases(pca$pink_hab),]
-View (pink)
 
 fit <- lm(pink_hab ~ Avg_slope_stream + Avg_Elevation_Stream + wetland_HUC + Channel_Complexity + River_Sinuosity + Floodplain_elev + Avg_lake_elev + Avg_Elevation_HUC + CV_elevation_HUC + Avg_slope_HUC + CV_Slope_HUC + CV_Slope_Stream + Glacier_Area + Floodplain_Area + Density_lakes + forest_HUC + Shrub + wetland_HUC, data = pink)
 
@@ -145,9 +173,12 @@ write.csv(pink_out, file="C:/Habitat_Diversity/Analysis/Data/pred_pink.csv")
 ```{r}
 #load data
 coho <- pca[complete.cases(pca$coho_hab),]
-View (coho)
+exclude <- c("name", "region")
+co<- coho[,!names(coho) %in% exclude]
+View (co)
 
-fit <- lm(coho_hab ~ Avg_slope_stream + Avg_Elevation_Stream + wetland_HUC + Channel_Complexity + River_Sinuosity + Floodplain_elev + Avg_lake_elev + Avg_Elevation_HUC + CV_elevation_HUC + Avg_slope_HUC + CV_Slope_HUC + CV_Slope_Stream + Glacier_Area + Floodplain_Area + Density_lakes + forest_HUC + Shrub + wetland_HUC, data = coho)
+coho1 <- normalize(c, method="standardize", margin=2)
+fit <- lm(coho_hab ~ Avg_slope_stream + Avg_Elevation_Stream + wetland_HUC + Channel_Complexity + River_Sinuosity + Floodplain_elev + Avg_lake_elev + Avg_Elevation_HUC + CV_elevation_HUC + Avg_slope_HUC + CV_Slope_HUC + CV_Slope_Stream + Glacier_Area + Floodplain_Area + Density_lakes + forest_HUC + Shrub + wetland_HUC, data = coho1)
 
 step5 <- stepAIC(fit, direction="both")
 step5$anova

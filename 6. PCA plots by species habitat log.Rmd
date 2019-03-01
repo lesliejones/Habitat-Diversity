@@ -86,14 +86,14 @@ Phab99 <- Phab9[complete.cases(Phab9),]
 #chart.Correlation(Phab99, histogram=TRUE, pch=19)
 skew <- skewness(Phab99)
 #View(skew)
-#Phab0 <- sapply(Phab99, function(x)log(x+1))
+Phab0 <- sapply(Phab99, function(x)log(x+1))
 #Phab0 <- normalize(Phab99, method="standardize", margin=2)
 #chart.Correlation(Phab0, histogram=TRUE, pch=19)
 #skew2 <- skewness(Phab0)
 #View(skew2)
 # need to scale and center data
 #Phabm<-scale(Phab[,!names(Phab) %in% exclude], scale=TRUE, center=TRUE)
-Phabm<-scale(Phab99, scale=TRUE, center=TRUE)
+Phabm<-scale(Phab0, scale=TRUE, center=TRUE)
 #View(Phabm)
 
 #compute PCA - all data
@@ -103,7 +103,8 @@ res.pca <- prcomp(Phabm, scale = FALSE)
 pcscores <- as.tibble(scores(res.pca))
 #View(pcscores)
 #add huc and region to the pc scores.
-pcout <- cbind(Phab33,pcscores)
+pcout <- cbind(Phab33$region, Phab33$id_numeric, Phab33$pink_hab, Phab33$coho_hab, Phab33$sockeye_hab, 
+               Phab33$coho_hab, Phab33$chum_hab,pcscores)
 
 #View(pcout)
 # get variable
@@ -282,7 +283,7 @@ Standardized habitat totals by HUC.
 ```{r}
 x1 <- Phab33 %>% pull(sockeye_hab) 
 x11 <- scales::rescale(x1, to=c(1,10))
-#View(x11)
+View(x11)
 
 fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=(x11), geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phab33$region, addEllipses = FALSE)
 
@@ -294,7 +295,7 @@ x2 [x2>0] <- 1
 x3 <- Phab33 %>% pull(sockeye_hab) 
 x31 <- scales::rescale(x3, to=c(1,10)) %>% replace_na(1)
 
-#View(x31)
+View(x31)
 
 fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, addEllipses = FALSE, invisible = "quali")
 
@@ -308,7 +309,7 @@ Standardized habitat totals by HUC.
 ```{r}
 x1 <- Phab33 %>% pull(pink_hab) 
 x11 <- scales::rescale(x1, to=c(1,10))
-#View(x11)
+View(x11)
 
 fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=(x11), geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phab33$region, addEllipses = FALSE)
 
@@ -320,7 +321,7 @@ x2 [x2>0] <- 1
 x3 <- Phab33 %>% pull(pink_hab) 
 x31 <- scales::rescale(x3, to=c(1,10)) %>% replace_na(1)
 
-#View(x31)
+View(x31)
 
 fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = x2, addEllipses = FALSE, invisible = "quali")
 
@@ -332,8 +333,8 @@ Standardized habitat totals by HUC.
 
 ```{r}
 y1 <- Phab33 %>% pull(chum_hab) 
-y11 <- scales::rescale(x1, to=c(1,10)) 
-#View(y11)
+y11 <- scales::rescale(x1, to=c(1,10)) %>% replace_na(0)
+View(y11)
 
 fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=y11, geom.ind = "point", axes = c(1,2), repel = TRUE, habillage = Phab33$region, addEllipses = FALSE)
 
