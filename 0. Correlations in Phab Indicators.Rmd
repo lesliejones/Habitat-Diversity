@@ -37,11 +37,11 @@ setwd ("C:/Habitat_Diversity/Analysis")
 ```{r}
 #load data
 Phab <- read_csv("C:/Habitat_Diversity/Analysis/Data/Phab_HUClevel_NEW_corr.csv")
-#View(Phab)
+View(Phab)
 Phab$cv_elev <- Phab$std_elev/Phab$avg_elev
 
 ```
-#HUC Geomorphic Correlations
+#Stream Geomorphic Correlations
 I used indices for acceptable limits of ±2 for skewness(Trochim & Donnelly, 2006; Field, 2000 & 2009; Gravetter & Wallnau, 2014) 
 References:
 Trochim, W. M., & Donnelly, J. P. (2006). The research methods knowledge base (3rd ed.). Cincinnati, OH:Atomic Dog.
@@ -67,7 +67,7 @@ geo_huc <- skewness(Phab_shed)
 View(geo_huc)
 ```
 
-#Stream Geomorphic Correlations
+#HUC Geomorphic Correlations
 ```{r}
 
 stream <- c("cv_elev", "std_elev", "avg_elev", "max_elev", "cv_slope", "std_slope", "avg_slope", "max_slope")

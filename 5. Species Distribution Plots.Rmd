@@ -34,7 +34,7 @@ setwd ("C:/Habitat_Diversity/Analysis")
 
 ```
 
-##Species Distribution Data by SASAP Regions
+##Species Distribution Data by SASAP Regions - total km standardized by watershed area
 
 ```{r, warning=FALSE, results='hide', message=FALSE}
 #load data

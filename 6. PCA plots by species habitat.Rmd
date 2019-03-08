@@ -2,7 +2,10 @@
 title: "Regions PHab Analysis"
 author: "Leslie Jones"
 date: "January 29, 2019"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE, warning=FALSE, results='hide', message=FALSE}
@@ -79,7 +82,7 @@ Phab33 <- left_join(Phab22, huchab, by="id_numeric")
 ```
 
 
-```{r}
+```{r, include=FALSE, warning=FALSE,  message=FALSE}
 ##PCA Analysis
 Phab9 <- Phab[,!names(Phab) %in% exclude]
 Phab99 <- Phab9[complete.cases(Phab9),] 
@@ -117,7 +120,7 @@ var <- get_pca_var(res.pca)
 ```
 
 
-```{r}
+```{r,  warning=FALSE,  message=FALSE}
 #vector arrows by phab
 fviz_pca_var(res.pca,
              col.var = "contrib", # Color by contributions to the PC
@@ -183,7 +186,7 @@ fviz_pca_biplot(res.pca, geom.ind = "none", axes = c(1,2),
 
 ```
 
-```{r warning=FALSE, message=FALSE}
+```{r ,  warning=FALSE,  message=FALSE}
 
 #F8766D
 #B79F00
@@ -224,7 +227,7 @@ Totals were created from AWC, Yukon and BC fish distribution data
 ##Hucs sized by Coho habitat
 Standardized habitat totals by HUC.
 
-```{r}
+```{r, warning=FALSE,  message=FALSE}
 x1 <- Phab33 %>% pull(coho_hab) 
 x11 <- scales::rescale(x1, to=c(1,10))
 #View(x11)
@@ -251,7 +254,7 @@ fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point"
 ##Hucs sized by Chinook habitat
 Standardized habitat totals by HUC.
 
-```{r}
+```{r, warning=FALSE,  message=FALSE}
 x1 <- Phab33 %>% pull(chinook_hab) 
 x11 <- scales::rescale(x1, to=c(1,10))
 #View(x11)
@@ -279,7 +282,7 @@ fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point"
 ##Hucs sized by Sockeye habitat
 Standardized habitat totals by HUC.
 
-```{r}
+```{r, warning=FALSE,  message=FALSE}
 x1 <- Phab33 %>% pull(sockeye_hab) 
 x11 <- scales::rescale(x1, to=c(1,10))
 #View(x11)
@@ -305,7 +308,7 @@ fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point"
 ##Hucs sized by Pink habitat
 Standardized habitat totals by HUC.
 
-```{r}
+```{r, warning=FALSE,  message=FALSE}
 x1 <- Phab33 %>% pull(pink_hab) 
 x11 <- scales::rescale(x1, to=c(1,10))
 #View(x11)
@@ -330,7 +333,7 @@ fviz_pca_biplot(res.pca, col.var="slategray3", pointsize=x31, geom.ind = "point"
 ##Hucs sized by Chum habitat
 Standardized habitat totals by HUC.
 
-```{r}
+```{r, warning=FALSE,  message=FALSE}
 y1 <- Phab33 %>% pull(chum_hab) 
 y11 <- scales::rescale(x1, to=c(1,10)) 
 #View(y11)
