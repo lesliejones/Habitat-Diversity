@@ -1,0 +1,220 @@
+---
+title: "Regions PHab Analysis"
+author: "Leslie Jones"
+date: "January 29, 2019"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE, warning=FALSE, results='hide', message=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(readr)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(psych)
+library(FactoMineR)
+library(ade4)
+library(amap)
+library(vegan)
+library(knitr)
+library(reshape2)
+library(MASS)
+library(data.table)
+library(factoextra)
+library (colorspace)
+library (RColorBrewer)
+library(ggplot2)
+library(lattice)
+library(readr)
+library (corrplot)
+library(moments)
+library(BBmisc)
+setwd ("C:/Habitat_Diversity/Analysis")
+
+```
+
+
+```{r, warning=FALSE, results='hide', message=FALSE}
+##Data management
+#load data
+Phab5 <- read_csv("C:/Habitat_Diversity/HUC_data/HUC_habitatData.csv")
+#View(Phab5)
+huchab <- read_csv("C:/Habitat_Diversity/Analysis/Data/Huc_habitat.csv")
+Phab8 <- left_join (Phab5, huchab, by="id_numeric")
+
+#View(Phab)
+Phab <- Phab8[complete.cases(Phab8$coho_km),]
+
+#exclude character variables and redundant for PCA
+
+exclude <- c("name", "region", "id_numeric", "region_id",  "coho_km", "coho_hab",
+             "X1", "chinook_km", "chinook_hab", "chum_km", "chum_hab", "pink_km", "pink_hab","sockeye_km", "sockeye_hab")
+     
+exclude2 <- c("coho_km", "coho_hab", "X1", "chinook_km", "chinook_hab", "chum_km", "chum_hab", "pink_km", "pink_hab",
+              "sockeye_km", "sockeye_hab")
+Phab2 <- Phab[ , !(names(Phab) %in% exclude2)] 
+Phab22 <- Phab2[complete.cases(Phab2), ]
+Phab33 <- left_join(Phab22, huchab, by="id_numeric")
+#View(Phab33)
+```
+
+
+```{r, include=FALSE, warning=FALSE,  message=FALSE}
+##PCA Analysis
+Phab9 <- Phab[,!names(Phab) %in% exclude]
+Phab99 <- Phab9[complete.cases(Phab9),] 
+
+skew <- skewness(Phab99)
+
+Phabm<-scale(Phab99, scale=TRUE, center=TRUE)
+#View(Phabm)
+
+#compute PCA - all data
+res.pca <- prcomp(Phabm, scale = FALSE)
+
+#pc1 is a tibble of all pc scores for 170 hucs.
+pcscores <- as.tibble(scores(res.pca))
+#View(pcscores)
+#add huc and region to the pc scores.
+pcout <- cbind(Phab33,pcscores)
+
+#View(pcout)
+# get variable
+var <- get_pca_var(res.pca)
+#View(var$cos2)
+
+#get pc scores by var - for objective 1 tables
+print(res.pca)
+loadings <- get
+#write.csv(loadings, file="C:/Habitat_Diversity/Analysis/Data/Var_loadings.csv")
+
+#plot with PC1 scores by var >0.3
+#use these to create labels for objective 2 figure
+ggplot(pcout, aes(x=PC1, y=elev_avgW)) + geom_point()
+
+ggplot(pcout, aes(x=PC1, y=slope_cvW)) + geom_point()
+
+ggplot(pcout, aes(x=PC2, y=pink_km)) + geom_point()
+ggplot(pcout, aes(x=PC2, y=sockeye_km)) + geom_point()
+ggplot(pcout, aes(x=PC1, y=chinook_km)) + geom_point()
+
+#export csv with scores by huc and region
+write.csv(pcout, file="C:/Habitat_Diversity/Analysis/Data/PCout_coho.csv")
+
+screeplot(res.pca, bstick=TRUE, type="lines")
+
+
+
+```
+
+
+```{r,  warning=FALSE,  message=FALSE}
+#vector arrows by phab
+fviz_pca_var(res.pca,
+             col.var = "contrib", # Color by contributions to the PC
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = FALSE     # Avoid text overlapping
+)
+
+#scree plot of eigenvalues - variance explained by each PC
+fviz_eig(res.pca, addlabels = TRUE, ylim = c(0,40))
+
+screeplot(res.pca, bstick=TRUE, type="lines")
+
+#visualize the cos2 of variables
+var <- get_pca_var(res.pca)
+corrplot(var$cos2, is.corr = FALSE)
+
+# Total cos2 of variables on Dim.1 and Dim.2
+fviz_cos2(res.pca, choice = "var", axes = 1:2)
+
+# Contributions of variables to PC1
+fviz_contrib(res.pca, choice = "var", axes = 1, top = 10)
+# Contributions of variables to PC2
+fviz_contrib(res.pca, choice = "var", axes = 2, top = 10)
+# Contributions of variables to PC3
+fviz_contrib(res.pca, choice = "var", axes = 3, top = 10)
+
+#graph 
+fviz_pca_ind(res.pca,
+             col.ind = "cos2", # Color by the quality of representation
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     # Avoid text overlapping
+)
+
+#individuals by region
+fviz_pca_ind(res.pca,
+             col.ind = Phab22$region, # color by groups
+             palette = ("rainbow_hcl"),
+             addEllipses =FALSE,
+             legend.title = "Groups",
+             repel = TRUE
+)
+
+#individuals by region with ellipse
+fviz_pca_ind(res.pca,
+             col.ind = Phab22$region, # color by groups
+             palette = ("rainbow_hcl"),
+             addEllipses =TRUE,
+             legend.title = "Groups",
+             repel = TRUE
+)
+
+
+#pc 1 and 2 with points colored and shaped by region, ellipses around regions 
+#habillage can be changed to display other factor variables - e.g. variable type.
+
+fviz_pca_ind(res.pca, geom.ind = "point", axes = c(1,2), 
+             repel = TRUE, habillage = Phab22$region, addEllipses = FALSE)
+
+fviz_pca_ind(res.pca, geom.ind = "point", axes = c(1,2), 
+             repel = TRUE, habillage = Phab22$region, addEllipses = TRUE)
+
+fviz_pca_ind(res.pca, geom.ind = "", axes = c(1,2), 
+             repel = TRUE, habillage = Phab22$region, addEllipses = TRUE)
+
+fviz_pca_biplot(res.pca, geom.ind = "point", axes = c(1,2), 
+                repel = TRUE, habillage = Phab22$region, addEllipses = TRUE)
+
+fviz_pca_biplot(res.pca, geom.ind = "none", axes = c(1,2), 
+                repel = TRUE, habillage = Phab22$region, addEllipses = TRUE)
+
+```
+
+```{r ,  warning=FALSE,  message=FALSE}
+
+fitsock <- lm(sockeye_hab ~ PC1 + PC2 , data = pcout)
+summary(fitsock)
+
+print(res.pca)
+
+myvarz <- c("slope_avgW", "slope_cvW" , "elev_avgW" , "sinuosity", "flood_elev", "elev_avgS", "wetland", "slope_avgS", "elev_cvS", "ccomplexity",
+            "forest", "shrub", "floodplainA", "lakeD", "sockeye_hab")
+socksub <- pcout[myvarz]
+chart.Correlation(socksub, histogram=TRUE, pch=19)
+
+fitsock <- lm(sockeye_hab ~ slope_avgW + slope_cvW + elev_avgW + sinuosity + flood_elev + elev_avgS + wetland + slope_avgS + elev_cvS +
+                ccomplexity + forest + shrub + floodplainA + lakeD , data = socksub)
+
+
+stepsock <- stepAIC(fitsock, direction="both")
+stepsock$anova
+
+summary (stepsock)
+
+vif(lm(sockeye_hab ~ slope_avgW + slope_cvW + elev_avgW + wetland + slope_avgS + elev_cvS + ccomplexity + forest + shrub  + lakeD , data = socksub))
+
+fitsock2 <- lm(sockeye_hab ~ slope_avgW  + elev_avgW + wetland + slope_avgS + elev_cvS + ccomplexity + forest + shrub  + lakeD , data = socksub)
+summary(fitsock2)
+vif(lm(sockeye_hab ~ slope_avgW  + elev_avgW + wetland + slope_avgS + elev_cvS + ccomplexity + forest + shrub  + lakeD , data = socksub))
+
+fitsock3 <- lm(sockeye_hab ~ slope_avgW  + wetland + slope_avgS +  ccomplexity + forest + shrub  + lakeD , data = socksub)
+summary(fitsock3)
+
+
+
+```

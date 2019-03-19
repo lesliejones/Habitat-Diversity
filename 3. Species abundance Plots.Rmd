@@ -36,6 +36,8 @@ p <- ggplot(data=species, aes(x=SASAP.Region, y=meanCumAnnualCount, fill=SASAP.R
 
 p + facet_grid(Species ~., scale="free")
 
+p + facet_grid(Species ~.)
+
 ```
 
 ## Chinook plot without Southeast region since Southeast has much higher Abundance than other regions.

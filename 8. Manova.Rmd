@@ -1,0 +1,136 @@
+---
+title: "8. Manova"
+author: "Leslie Jones"
+date: "March 14, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Create dataframe for Manova and Figure
+
+Use PCout from Objective 1 to calculate mean and std of PC1 and PC2 scores by region and species
+
+```{r}
+PCscores <- read_csv("C:/Habitat_Diversity/Analysis/Data/pcscores_huc.csv")
+myvarz <- c("PC1", "PC2", "region")
+
+coho <- PCscores[complete.cases(PCscores$coho_hab),]
+View(coho)
+coho2 <- coho[myvarz]
+coho3 <- coho2 %>% group_by(region) %>% 
+    summarise(PC1_avg = mean(PC1), PC1_std = sd(PC1), PC2_avg = mean(PC2), PC2_std = sd(PC2))
+coho3$species ="coho"
+#View(coho3)
+
+
+chinook <- PCscores[complete.cases(PCscores$chinook_hab),]
+View(chinook)
+chinook2 <- chinook[myvarz]
+chinook3 <- chinook2 %>% group_by(region) %>% 
+    summarise(PC1_avg = mean(PC1), PC1_std = sd(PC1), PC2_avg = mean(PC2), PC2_std = sd(PC2))
+chinook3$species ="chinook"
+View(chinook3)
+
+
+pink <- PCscores[complete.cases(PCscores$pink_hab),]
+View(pink)
+pink2 <- pink[myvarz]
+pink3 <- pink2 %>% group_by(region) %>% 
+    summarise(PC1_avg = mean(PC1), PC1_std = sd(PC1), PC2_avg = mean(PC2), PC2_std = sd(PC2))
+pink3$species ="pink"
+View(pink3)
+
+
+sock <- PCscores[complete.cases(PCscores$sockeye_hab),]
+View(sock)
+sock2 <- sock[myvarz]
+sock3 <- sock2 %>% group_by(region) %>% 
+    summarise(PC1_avg = mean(PC1), PC1_std = sd(PC1), PC2_avg = mean(PC2), PC2_std = sd(PC2))
+sock3$species ="sockeye"
+View(sock3)
+
+
+chum <- PCscores[complete.cases(PCscores$chum_hab),]
+chum2 <- chum[myvarz]
+chum3 <- chum2 %>% group_by(region) %>% 
+    summarise(PC1_avg = mean(PC1), PC1_std = sd(PC1), PC2_avg = mean(PC2), PC2_std = sd(PC2))
+chum3$species ="chum"
+View(chum3)
+
+
+manova <- rbind(coho3, chinook3, sock3, chum3, pink3)
+View(manova)
+write.csv(manova, file="C:/Habitat_Diversity/Analysis/Data/manova_data.csv")
+
+```
+
+```{r}
+salmon <- PCscores[myvarz]
+salmon2 <- salmon %>% group_by(region) %>% 
+    summarise(PC1_avg = mean(PC1), PC1_std = sd(PC1), PC2_avg = mean(PC2), PC2_std = sd(PC2))
+View(salmon2)
+write.csv(salmon2, file="C:/Habitat_Diversity/Analysis/Data/manova_region.csv")
+
+ggplot (salmon2, aes (x=PC1_avg, y=PC2_avg, colour= region, size=9)) + geom_point()
+
+```
+
+```{r}
+PCcoho <- read_csv("C:/Habitat_Diversity/Analysis/Data/PCout_coho.csv")
+coho2 <- PCcoho %>% group_by(region) %>% 
+    summarise(PC1_avg = mean(PC1), PC1_std = sd(PC1), PC2_avg = mean(PC2), PC2_std = sd(PC2))
+coho2$species ="coho"
+View(coho2)
+
+
+PCsock <- read_csv("C:/Habitat_Diversity/Analysis/Data/PCout_sockeye.csv")
+sock2 <- PCsock %>% group_by(region) %>% 
+    summarise(PC1_avg = mean(PC1), PC1_std = sd(PC1), PC2_avg = mean(PC2), PC2_std = sd(PC2))
+sock2$species ="sockeye"
+View(sock2)
+
+
+PCchum <- read_csv("C:/Habitat_Diversity/Analysis/Data/PCout_chum.csv")
+chum2 <- PCchum %>% group_by(region) %>% 
+    summarise(PC1_avg = mean(PC1), PC1_std = sd(PC1), PC2_avg = mean(PC2), PC2_std = sd(PC2))
+chum2$species ="chum"
+View(chum2)
+
+
+PCpink <- read_csv("C:/Habitat_Diversity/Analysis/Data/PCout_pink.csv")
+pink2 <- PCpink %>% group_by(region) %>% 
+    summarise(PC1_avg = mean(PC1), PC1_std = sd(PC1), PC2_avg = mean(PC2), PC2_std = sd(PC2))
+pink2$species ="pink"
+View(pink2)
+
+
+PCchin <- read_csv("C:/Habitat_Diversity/Analysis/Data/PCout_chinook.csv")
+chinook2 <- PCchin %>% group_by(region) %>% 
+    summarise(PC1_avg = mean(PC1), PC1_std = sd(PC1), PC2_avg = mean(PC2), PC2_std = sd(PC2))
+chinook2$species ="chinook"
+View(chinook2)
+
+manova_species <- rbind(coho2, sock2, chinook2, pink2, chum2)
+View(manova_species)
+write.csv(manova_species, file="C:/Habitat_Diversity/Analysis/Data/manova_species.csv")
+
+```
+
+
+## Create figure for objective 1
+
+
+```{r }
+p <- ggplot (manova, aes (x=PC1_avg, y=PC2_avg, colour= region)) + geom_point()
+
+p + geom_point(aes(shape=factor(species), size= 8))
+
+ggplot (manova, aes (x=PC1_avg, y=PC2_avg, colour= region, size=9)) + geom_point()
+
+q + geom_point(aes(shape=factor(species), size= 8))
+```
+
+

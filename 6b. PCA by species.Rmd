@@ -115,6 +115,8 @@ var <- get_pca_var(res.pca)
 
 #get pc scores by var - for objective 1 tables
 print(res.pca)
+loadings <- get
+write.csv(loadings, file="C:/Habitat_Diversity/Analysis/Data/Var_loadings.csv")
 
 #plot with PC1 scores by var >0.3
 #use these to create labels for objective 2 figure
@@ -122,8 +124,12 @@ ggplot(pcout, aes(x=PC1, y=elev_avgW)) + geom_point()
 
 ggplot(pcout, aes(x=PC1, y=slope_cvW)) + geom_point()
 
+ggplot(pcout, aes(x=PC2, y=pink_km)) + geom_point()
+ggplot(pcout, aes(x=PC2, y=sockeye_km)) + geom_point()
+ggplot(pcout, aes(x=PC1, y=chinook_km)) + geom_point()
+
 #export csv with scores by huc and region
-write.csv(pcout, file="C:/Habitat_Diversity/Analysis/Data/PCscores_region.csv")
+#write.csv(pcout, file="C:/Habitat_Diversity/Analysis/Data/PCscores_huc.csv")
 
 
 ```
@@ -200,10 +206,6 @@ fviz_pca_biplot(res.pca, geom.ind = "point", axes = c(1,2),
 fviz_pca_biplot(res.pca, geom.ind = "none", axes = c(1,2), 
                 repel = TRUE, habillage = Phab22$region, addEllipses = TRUE)
 
-
-fviz_pca_ind(res.pca, geom.ind = "", axes = c(1,2), 
-             repel = TRUE, habillage = Phab22$region, addEllipses = TRUE, ellipse.type = "confidence")
-
 ```
 
 ```{r ,  warning=FALSE,  message=FALSE}
@@ -221,7 +223,7 @@ fviz_pca_ind(res.pca, geom.ind = "", axes = c(1,2),
 #Arctic Yukon add kuskokwim add kotzebue
 fviz_pca_biplot(res.pca, geom.ind = "point", axes = c(1,2), 
                 repel = TRUE, habillage = Phab33$region, addEllipses = TRUE,
-                palette = c( rep("white",5), "#F8766D", rep("white",7)))
+                palette = c( "white", "#F8766D", rep("white",5),"#619CFF", "#00BFC4", rep("white",3), "#00BA38"))
 
 
 #other similar systems

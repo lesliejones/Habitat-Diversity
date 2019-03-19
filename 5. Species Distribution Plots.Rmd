@@ -41,28 +41,34 @@ setwd ("C:/Habitat_Diversity/Analysis")
 coho <- read_csv("C:/Habitat_Diversity/Analysis/Data/coho_regions.txt")
 coho$Species = "coho"
 coho$habitat = (coho$coho_km/coho$area_km2)
-coho2 <- subset(coho, select = c(region, habitat, Species)) 
+coho$km = coho$coho_km
+coho2 <- subset(coho, select = c(region, habitat, Species, km)) 
+View(coho2)
 #View (coho2)
 
 pink <- read_csv("C:/Habitat_Diversity/Analysis/Data/pink_regions.txt")
 pink$Species = "pink"
 pink$habitat = (pink$pink_km/pink$area_km2)
-pink2 <- subset(pink, select = c(region, habitat, Species)) 
+pink$km = pink$pink_km
+pink2 <- subset(pink, select = c(region, habitat, Species, km)) 
 
 chinook <- read_csv("C:/Habitat_Diversity/Analysis/Data/chinook_regions.txt")
 chinook$Species = "chinook"
 chinook$habitat = (chinook$chinook_km/chinook$area_km2)
-chinook2 <- subset(chinook, select = c(region, habitat, Species)) 
+chinook$km = chinook$chinook_km
+chinook2 <- subset(chinook, select = c(region, habitat, Species, km)) 
 
 sockeye <- read_csv("C:/Habitat_Diversity/Analysis/Data/sockeye_regions.txt")
 sockeye$Species = "sockeye"
 sockeye$habitat = (sockeye$sockeye_km/sockeye$area_km2)
-sockeye2 <- subset(sockeye, select = c(region, habitat, Species)) 
+sockeye$km = sockeye$sockeye_km
+sockeye2 <- subset(sockeye, select = c(region, habitat, Species, km)) 
 
 chum <- read_csv("C:/Habitat_Diversity/Analysis/Data/chum_regions.txt")
 chum$Species = "chum"
 chum$habitat = (chum$chum_km/chum$area_km2)
-chum2 <- subset(chum, select = c(region, habitat, Species)) 
+chum$km = chum$chum_km
+chum2 <- subset(chum, select = c(region, habitat, Species, km)) 
 
 regions <- rbind (coho2, pink2, sockeye2,chum2, chinook2)
 
@@ -86,6 +92,12 @@ p + facet_grid(Species ~.)
 q <- ggplot(data=regions, aes(x=region, y=habitat, fill=region)) + geom_bar(stat = "identity") + facet_wrap(~Species) + theme(axis.text.x = element_text(angle = 90, hjust=1), legend.position = "none")
 
 q + facet_grid(Species ~.)
+
+p <- ggplot(data=regions, aes(x=region, y=km, fill=region)) + geom_bar(stat = "identity") + facet_wrap(~Species) + theme(axis.text.x = element_text(angle = 90, hjust=1), legend.position = "none")
+
+p + facet_grid(Species ~., scale="free")
+
+
 
 ```
 #Species Distributions by HUC for PCA plots

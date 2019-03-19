@@ -29,6 +29,7 @@ library(lattice)
 library(readr)
 library (corrplot)
 library(car)
+library("PerformanceAnalytics")
 setwd ("C:/Habitat_Diversity/Analysis")
 
 ```
@@ -46,7 +47,11 @@ myvars <- c("slope_avgW", "elev_avgW", "wetland", "ccomplexity", "sinuosity", "f
 ch3 <- chinook[myvars] 
 res <- cor(ch3)
 round(res,2)
-write.csv(res, file="C:/Habitat_Diversity/Analysis/Data/corr_chinook.csv")
+#write.csv(res, file="C:/Habitat_Diversity/Analysis/Data/corr_chinook.csv")
+
+myvars2 <- c("slope_avgW", "elev_avgW", "wetland", "ccomplexity", "sinuosity", "flood_elev", "lake_elev", "elev_avgS", "elev_cvS", "slope_avgS", "slope_cvS", "slope_cvW", "glacierA", "floodplainA", "lakeD", "forest", "shrub", "chinook_hab")
+ch33 <- chinook[myvars2] 
+chart.Correlation(ch33, histogram=TRUE, pch=19)
 
 fit <- lm(chinook_hab ~ elev_avgW + wetland + ccomplexity + sinuosity + flood_elev + lake_elev  + elev_cvS + slope_avgS +  glacierA + floodplainA + lakeD + forest + shrub , data = chinook)
 
@@ -88,7 +93,16 @@ ress <- cor(ch3s)
 round(ress,2)
 write.csv(ress, file="C:/Habitat_Diversity/Analysis/Data/corr_sock.csv")
 
+myvars2 <- c("slope_avgW", "elev_avgW", "wetland", "ccomplexity", "sinuosity", "flood_elev", "lake_elev", "elev_avgS", "elev_cvS", "slope_avgS", "slope_cvS", "slope_cvW", "glacierA", "floodplainA", "lakeD", "forest", "shrub", "sockeye_hab")
+ch33s <- sock[myvars2] 
+chart.Correlation(ch33s, histogram=TRUE, pch=19)
+
 fits <- lm(sockeye_hab ~ elev_avgW + wetland + ccomplexity + sinuosity + flood_elev + lake_elev  + elev_cvS + slope_avgS +  glacierA + floodplainA + lakeD + forest + shrub , data = sock)
+
+
+#fits <- lm(sockeye_hab ~ PC1 + PC2 , data = sock)
+#summary(fits)
+
 
 step2s <- stepAIC(fits, direction="both")
 step2s$anova

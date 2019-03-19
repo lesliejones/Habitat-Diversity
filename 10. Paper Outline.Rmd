@@ -1,0 +1,90 @@
+---
+title: "Paper Outline"
+author: "Leslie Jones"
+date: "March 13, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Objectives
+
+1a. What landscape factors characterize salmon habitat diversity? and to what extent do regions differ? 
+methods
+-Characterize habitat diversity in salmon watersheds in ak
+-retain pc 1 and 2 by broken stick
+-vars 1-x most influential based on >0.3....
+  
+Figure 1. Map of regions
+Figure 2. Two panel figure: 1. PCA vector plot 2.ellipse by region (confidence or concentration?)
+Table 1. PC1 and PC2 by landscape factor WITH variance explained for each component (at bottom)
+  
+  
+MANOVA TEST - to test for difference across regions - response PC1 and PC2 
+    - manova suggests that regions are different 
+
+1b. Are landscape factors characterizing habitat diversity for individual species different across regions?
+What features best distinguish pink habitat across watersheds?
+- MANOVA TEST suggests that there is a region effect at the species level - use broken stick to determine how many dimensions to use in MANOVA test = PC1 - PC4 for all species
+- Linear Discriminant Analysis (LDA) as post-hoc analysis to assess reassignment accuracy - report percentages in results
+- Supplemental add Confusion Table of LDA
+
+Figure 3. 5 panel figure of ellipses by region for each species with labels for regions and text to interpret PC1 and PC1 axes
+     - picture of fish in each panel
+     - use direction of ellipses (pc1/pc2) to describe differences across regions
+
+Supplemental Table of PC1 and PC2 loadings for each species
+ 
+
+2. What habitat features in a watersheds explain species occurrence?
+ - Response = Species Specific Habitat Density (total km/area km2) - SSHD in the house
+ - use the species specific PCA (PC1 - PC4) to identify important drivers (>0.3)
+ - use a mixed model with random effect for region
+ - look at correlations first to subset variables
+ 
+ ***Need to recalculate stream reach indicators for individual species before model run
+ 
+ Use AWC points and known occurrence watersheds to "summarize" the distribution of most important predictors in species specific models
+ Figure 4. Boxplots or distribution curves of important drivers for each species
+ 
+
+ 3. Identify HUCs with high salmon potential with undocumented occurrence 
+ - use species specific models to predict occurrence 
+ - Contingency table - identify hucs currently occupied with low and high occurrence AND HUCs not occupied with high and low suitability
+ - use full network (subsetted by slope range of species distributions) to make predictions
+ - calculate some sort of occupancy percentage - identify hucs with high potential and use predictive network (subset by slope) to calculate x km of streams not in AWC
+
+Figure 5. 5 panel maps with inset of contigency table with species distributions
+
+##Notes
+
+stream reach indicators
+-lower slope more juveniles - substrate - groundwater
+-elevation proxy temperature - migration arduousness
+
+watershed indicators
+- hydrology (snow vs rain)
+- temperature
+
+
+Julie Furman reach/watershed indicators
+
+
+Discussion
+-pink salmon in fraser go far - so why not in AK
+- arduousness = elevation*distance 
+-regional effects of forest/shrub
+-shifting shrubline - climate shifting story
+- Obj 3 - just physical template not accounting for climate, temp, substrate....
+- reassign error - regions closer in proximinity
+
+##Action
+Objective 1
+ - add elev_cvW to PCA
+ - CONFIDENCE VS CONCENTRATION ELLIPSES?
+
+Objective 2
+ - REcalculate species specific stream reach indicators (slope and elevation)
+
