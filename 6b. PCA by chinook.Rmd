@@ -41,7 +41,7 @@ setwd ("C:/Habitat_Diversity/Analysis")
 ```{r, warning=FALSE, results='hide', message=FALSE}
 ##Data management
 #load data
-Phab5 <- read_csv("C:/Habitat_Diversity/HUC_data/HUC_habitatData.csv")
+Phab5 <- read_csv("C:/Habitat_Diversity/HUC_data/HUC_habitatData_031819.csv")
 #View(Phab5)
 huchab <- read_csv("C:/Habitat_Diversity/Analysis/Data/Huc_habitat.csv")
 Phab8 <- left_join (Phab5, huchab, by="id_numeric")

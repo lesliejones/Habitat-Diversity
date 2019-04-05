@@ -41,8 +41,8 @@ setwd ("C:/Habitat_Diversity/Analysis")
 ```{r, warning=FALSE, results='hide', message=FALSE}
 ##Data management
 #load data
-Phab5 <- read_csv("C:/Habitat_Diversity/HUC_data/HUC_habitatData.csv")
-#View(Phab5)
+Phab5 <- read_csv("C:/Habitat_Diversity/HUC_data/HUC_habitatData_031819.csv")
+View(Phab5)
 huchab <- read_csv("C:/Habitat_Diversity/Analysis/Data/Huc_habitat.csv")
 Phab <- left_join (Phab5, huchab, by="id_numeric")
 
@@ -115,37 +115,75 @@ var <- get_pca_var(res.pca)
 
 #get pc scores by var - for objective 1 tables
 print(res.pca)
-loadings <- get
-write.csv(loadings, file="C:/Habitat_Diversity/Analysis/Data/Var_loadings.csv")
-
+pcvar <- get_pca_var(res.pca)
+write.csv(pcvar$coord, file="C:/Habitat_Diversity/Analysis/Data/PC_by_habitat.csv")
 #plot with PC1 scores by var >0.3
 #use these to create labels for objective 2 figure
 ggplot(pcout, aes(x=PC1, y=elev_avgW)) + geom_point()
 
 ggplot(pcout, aes(x=PC1, y=slope_cvW)) + geom_point()
 
-ggplot(pcout, aes(x=PC2, y=pink_km)) + geom_point()
-ggplot(pcout, aes(x=PC2, y=sockeye_km)) + geom_point()
-ggplot(pcout, aes(x=PC1, y=chinook_km)) + geom_point()
-
 #export csv with scores by huc and region
-#write.csv(pcout, file="C:/Habitat_Diversity/Analysis/Data/PCscores_huc.csv")
+write.csv(pcout, file="C:/Habitat_Diversity/Analysis/Data/pcscores_huc.csv")
 
 
 ```
 
 
-```{r,  warning=FALSE,  message=FALSE}
-#vector arrows by phab
+
+<color-palette name="Viridis 20 diverging" type="ordered-diverging" >
+<color>#440154FF </color>
+<color>#481567FF </color>
+<color>#482677FF </color>
+<color>#453781FF </color>
+<color>#404788FF </color>
+<color>#39568CFF </color>
+<color>#33638DFF </color>
+<color>#2D708EFF </color>
+<color>#287D8EFF </color>
+<color>#238A8DFF </color>
+<color>#1F968BFF </color>
+<color>#20A387FF </color>
+<color>#29AF7FFF </color>
+<color>#3CBB75FF </color>
+<color>#55C667FF </color>
+<color>#73D055FF </color>
+<color>#95D840FF </color>
+<color>#B8DE29FF </color>
+<color>#DCE319FF </color>
+<color>#FDE725FF </color>
+</color-palette>
+```{r}
+
+#Figure 1 a for manuscript
 fviz_pca_var(res.pca,
              col.var = "contrib", # Color by contributions to the PC
-             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-             repel = FALSE     # Avoid text overlapping
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
+             repel = TRUE   # Avoid text overlapping
 )
+#FIGURE 2B-2D
+fviz_pca_biplot(res.pca, label = "var", habillage=Phab33$region, geom.ind = "none", 
+               addEllipses=TRUE, ellipse.level=0.90,repel=TRUE,
+               palette = c("white", "#440154FF",rep("white",5), "#55C667FF", "white", rep("white",3), "#FDE725FF"))
+
+fviz_pca_biplot(res.pca, label = "var", habillage=Phab33$region, geom.ind = "none", 
+               addEllipses=TRUE, ellipse.level=0.90, repel=TRUE,
+               palette = c("white", "white", "#440154FF", "white", "#55C667FF", "white", rep("white",4),
+                             "white", "#FDE725FF", "white"))
+
+fviz_pca_biplot(res.pca, label = "var", habillage=Phab33$region, geom.ind = "none", 
+               addEllipses=TRUE, ellipse.level=0.90, repel=TRUE,
+               palette = c("#440154FF", rep("white",4), "#55C667FF", rep("white",2),"#FDE725FF", "white", 
+                             rep("white",3)))
+```
+
+
+```{r,  warning=FALSE,  message=FALSE}
 
 #scree plot of eigenvalues - variance explained by each PC
 fviz_eig(res.pca, addlabels = TRUE, ylim = c(0,40))
 
+#broken stick test
 screeplot(res.pca, bstick=TRUE, type="lines")
 
 #visualize the cos2 of variables
@@ -165,7 +203,7 @@ fviz_contrib(res.pca, choice = "var", axes = 3, top = 10)
 #graph 
 fviz_pca_ind(res.pca,
              col.ind = "cos2", # Color by the quality of representation
-             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
              repel = TRUE     # Avoid text overlapping
 )
 
@@ -203,8 +241,30 @@ fviz_pca_ind(res.pca, geom.ind = "", axes = c(1,2),
 fviz_pca_biplot(res.pca, geom.ind = "point", axes = c(1,2), 
                 repel = TRUE, habillage = Phab22$region, addEllipses = TRUE)
 
+fviz_pca_ind(res.pca, geom.ind = "", axes = c(1,2), 
+             repel = TRUE, habillage = Phab22$region, addEllipses = TRUE, ellipse.type = "confidence")
+
 fviz_pca_biplot(res.pca, geom.ind = "none", axes = c(1,2), 
-                repel = TRUE, habillage = Phab22$region, addEllipses = TRUE)
+                repel = TRUE, habillage = Phab22$region, addEllipses = TRUE, pallete="RdBu")
+
+#Arctic Yukon add kuskokwim add kotzebue
+fviz_pca_biplot(res.pca, geom.ind = "none", axes = c(1,2), 
+                repel = TRUE, habillage = Phab22$region, addEllipses = TRUE,
+                palette = c( "white", "#66CC99",rep("white",5), "#333366", "white", rep("white",3), "#FF9933"))
+
+#other similar systems
+# Cook Inlet and Bristol Bay  and southeast and PWS
+fviz_pca_biplot(res.pca, geom.ind = "none", axes = c(1,2), 
+                repel = TRUE, habillage = Phab33$region, addEllipses = TRUE,
+                palette = c( "white", "white", "#B79F00", "white", "#F564E3", "white", rep("white",4),
+                             "white", "#00BFC4", "white"))
+
+# Aleutian,  Norton Sound kodiak chignik
+fviz_pca_biplot(res.pca, geom.ind = "none", axes = c(1,2), 
+                repel = TRUE, habillage = Phab33$region, addEllipses = TRUE, alpha.var="contrib", gradient.cols = "blue",
+                ellipse.type="confidence",
+                palette = c("#B79F00", rep("white",4), "#619CFF", rep("white",2),"#619CFF", "#00BFC4", 
+                             rep("white",3)))
 
 ```
 
@@ -223,7 +283,7 @@ fviz_pca_biplot(res.pca, geom.ind = "none", axes = c(1,2),
 #Arctic Yukon add kuskokwim add kotzebue
 fviz_pca_biplot(res.pca, geom.ind = "point", axes = c(1,2), 
                 repel = TRUE, habillage = Phab33$region, addEllipses = TRUE,
-                palette = c( "white", "#F8766D", rep("white",5),"#619CFF", "#00BFC4", rep("white",3), "#00BA38"))
+                palette = c( rep("white",5), "#F8766D", rep("white",7)))
 
 
 #other similar systems

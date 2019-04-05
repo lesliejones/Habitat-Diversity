@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 Use PCout from Objective 1 to calculate mean and std of PC1 and PC2 scores by region and species
 
 ```{r}
-PCscores <- read_csv("C:/Habitat_Diversity/Analysis/Data/pcscores_huc.csv")
+PCscores <- read_csv("C:/Habitat_Diversity/Analysis/Data/PCscores_huc.csv")
 myvarz <- c("PC1", "PC2", "region")
 
 coho <- PCscores[complete.cases(PCscores$coho_hab),]
