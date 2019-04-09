@@ -41,7 +41,7 @@ setwd ("C:/Habitat_Diversity/Analysis")
 ```{r, warning=FALSE, results='hide', message=FALSE}
 ##Data management
 #load data
-Phab5 <- read_csv("C:/Habitat_Diversity/HUC_data/HUC_habitatData.csv")
+Phab5 <- read_csv("C:/Habitat_Diversity/HUC_data/HUC_habitatData_031819.csv")
 #View(Phab5)
 huchab <- read_csv("C:/Habitat_Diversity/Analysis/Data/Huc_habitat.csv")
 Phab8 <- left_join (Phab5, huchab, by="id_numeric")
@@ -71,7 +71,7 @@ Phab99 <- Phab9[complete.cases(Phab9),]
 skew <- skewness(Phab99)
 
 Phabm<-scale(Phab99, scale=TRUE, center=TRUE)
-#View(Phabm)
+View(Phabm)
 
 #compute PCA - all data
 res.pca <- prcomp(Phabm, scale = FALSE)
@@ -95,11 +95,86 @@ print(res.pca)
 #write.csv(loadings, file="C:/Habitat_Diversity/Analysis/Data/Var_loadings.csv")
 
 #export csv with scores by huc and region
-#write.csv(pcout, file="C:/Habitat_Diversity/Analysis/Data/PCout_pink.csv")
+write.csv(pcout, file="C:/Habitat_Diversity/Analysis/Data/PCout_pink.csv")
+
+#broken stick
+screeplot(res.pca, bstick=TRUE, type="lines")
 
 
 ```
+Broken Stick for pink = retain 2 dimensions
+Indicator coordinates for PC1 and PC2 > 0.3 is everything except lakeD - model 1
+```{r ,  warning=FALSE,  message=FALSE}
+#r2=0.13 - not good model fit with PC scores will build species specific models with habitat indicators
+#fitpink2 <- lm(pink_hab ~ PC1 + PC2 + PC3 , data = pcout)
+#summary(fitpink2)
 
+print(res.pca)
+
+#Use habitat indicator coordinates to select indicators for model - choose all indicators > 0.3
+pcvar <- get_pca_var(res.pca)
+write.csv(pcvar$coord, file="C:/Habitat_Diversity/Analysis/Data/Pink_indicator_scores.csv")
+
+#FULL LIST
+#myvar<- c("slope_avgW", "slope_cvW", "elev_avgW", "elev_cvW", "forest", "shrub", "wetland", "ccomplexity", "sinuosity", #"floodplainA", "flood_elev", "lake_elev", "lakeD", "glacierA","elev_avgS", "elev_cvS", "slope_avgS", "slope_cvS", "pink_hab", #"region")
+#model with all indicators
+# slope_avgW + slope_cvW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity + floodplainA +
+# flood_elev + lake_elev + lakeD + glacierA + elev_avgS + elev_cvS + slope_avgS + slope_cvS
+
+#choose variables to subset for model - all indicators >0.3 in PC1 and PC2
+myvar<- c("slope_avgW", "slope_cvW", "elev_avgW", "elev_cvW", "forest", "shrub", "wetland", "ccomplexity", "sinuosity", "floodplainA", "flood_elev", "lake_elev", "glacierA","elev_avgS", "elev_cvS", "slope_avgS", "slope_cvS", "pink_hab", "region")
+
+pinksub <- pcout[myvar]
+chart.Correlation(pinksub, histogram=TRUE, pch=19)
+
+fitpink <- lm(pink_hab ~ slope_avgW + slope_cvW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity + floodplainA + flood_elev + lake_elev + glacierA + elev_avgS + elev_cvS + slope_avgS + slope_cvS , data = pinksub)
+
+steppink <- stepAIC(fitpink, direction="both")
+steppink$anova
+summary (steppink)
+
+#all subsets stepwise model was used to identify fixed effects for random model. First check VIF for multicollinearity.
+
+library(car)
+vif(lm(pink_hab ~ slope_avgW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity, data=pinksub))
+#all VIF<5 so ok.
+
+library(lme4)
+fitpink2 <- lmer(pink_hab ~ slope_avgW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity + (1|region) , data = pinksub)
+summary(fitpink2)
+library(piecewiseSEM)
+# Get R2 for linear mixed effects model (lme4)
+r2pink <- rsquared(lme4::lmer(pink_hab ~ slope_avgW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity + (1|region) , data = pinksub))
+# report marginal and conditional r2 (package= piecewiseSEM) 
+#Marginal = proportion of variance explained by fixed
+#conditional = proportion of variance explained by both fixed and random
+
+View(r2pink)
+
+
+
+```
+```{r}
+#predict on full dataframe
+pink_pred <- predict(fit2, pca)
+pink_out <- cbind(pca,pink_pred) 
+pink_out$pink_pred2=(pink_out$pink_pred*100)
+pink_out$pink_hab2 = (pink_out$pink_hab*100)
+View(pink_out)
+
+ggplot(pink_out, aes(x=pink_pred, y=pink_hab)) + geom_point()
+
+pink_pred <- predict(fit3, pca)
+pink_out <- cbind(pca,pink_pred) 
+pink_out$pink_pred2=(pink_out$pink_pred*100)
+pink_out$pink_hab2 = (pink_out$pink_hab*100)
+View(pink_out)
+
+ggplot(pink_out, aes(x=pink_pred, y=pink_hab)) + geom_point()
+
+
+#write.csv(pink_out, file="C:/Habitat_Diversity/Analysis/Data/pred_pink.csv")
+```
 
 ```{r,  warning=FALSE,  message=FALSE}
 #vector arrows by phab
@@ -174,58 +249,4 @@ fviz_pca_biplot(res.pca, geom.ind = "none", axes = c(1,2),
 
 ```
 
-```{r ,  warning=FALSE,  message=FALSE}
 
-#fitpink2 <- lm(pink_hab ~ PC1 + PC2 + PC3 + PC4, data = pcout)
-#summary(fitpink2)
-
-print(res.pca)
-
-myvar<- c("slope_avgW", "slope_cvW", "elev_avgW", "wetland", "slope_avgS", "ccomplexity", "sinuosity", "flood_elev", "elev_avgS", "elev_cvS", "slope_avgS", "shrub",
-             "floodplainA", "glacierA", "slope_cvS", "pink_hab", "region")
-
-pinksub <- pcout[myvar]
-chart.Correlation(pinksub, histogram=TRUE, pch=19)
-
-fitpink <- lm(pink_hab ~ slope_avgW + slope_cvW + elev_avgW + wetland + slope_avgS + ccomplexity + sinuosity + flood_elev + elev_avgS + elev_cvS + slope_avgS + shrub +
-             floodplainA + glacierA + slope_cvS , data = pinksub)
-
-
-steppink <- stepAIC(fitpink, direction="both")
-steppink$anova
-summary (steppink)
-
-library(car)
-vif(lm(pink_hab ~ slope_avgW + elev_avgW + wetland + ccomplexity + elev_avgS + slope_cvS, data=pinksub))
-
-library(lme4)
-fit2 <- lmer(pink_hab ~ slope_avgW + elev_avgW + wetland + ccomplexity + elev_avgS + slope_cvS + 1|region , data = pinksub)
-summary(fit2)
-
-library(piecewiseSEM)
-
-fit3 <- lm(pink_hab ~ slope_avgW + elev_avgW + wetland + ccomplexity + elev_avgS + slope_cvS , data = pinksub)
-summary(fit3)
-
-#predict on full dataframe
-pink_pred <- predict(fit2, pca)
-pink_out <- cbind(pca,pink_pred) 
-pink_out$pink_pred2=(pink_out$pink_pred*100)
-pink_out$pink_hab2 = (pink_out$pink_hab*100)
-View(pink_out)
-
-ggplot(pink_out, aes(x=pink_pred, y=pink_hab)) + geom_point()
-
-pink_pred <- predict(fit3, pca)
-pink_out <- cbind(pca,pink_pred) 
-pink_out$pink_pred2=(pink_out$pink_pred*100)
-pink_out$pink_hab2 = (pink_out$pink_hab*100)
-View(pink_out)
-
-ggplot(pink_out, aes(x=pink_pred, y=pink_hab)) + geom_point()
-
-
-write.csv(pink_out, file="C:/Habitat_Diversity/Analysis/Data/pred_pink.csv")
-
-
-```

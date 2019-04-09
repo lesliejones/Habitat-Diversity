@@ -71,7 +71,7 @@ Phab99 <- Phab9[complete.cases(Phab9),]
 skew <- skewness(Phab99)
 
 Phabm<-scale(Phab99, scale=TRUE, center=TRUE)
-#View(Phabm)
+View(Phabm)
 
 #compute PCA - all data
 res.pca <- prcomp(Phabm, scale = FALSE)
@@ -100,7 +100,61 @@ screeplot(res.pca, bstick=TRUE, type="lines")
 ```
 
 
+Indicator coordinates for PC1 and PC2 > 0.3 is everything except lakeD - model 1
+```{r ,  warning=FALSE,  message=FALSE}
 
+print(res.pca)
+
+#Use habitat indicator coordinates to select indicators for model - choose all indicators > 0.3
+pcvar <- get_pca_var(res.pca)
+write.csv(pcvar$coord, file="C:/Habitat_Diversity/Analysis/Data/Chinook_indicator_scores.csv")
+
+#FULL LIST
+#myvar<- c("slope_avgW", "slope_cvW", "elev_avgW", "elev_cvW", "forest", "shrub", "wetland", "ccomplexity", "sinuosity", #"floodplainA", "flood_elev", "lake_elev", "lakeD", "glacierA","elev_avgS", "elev_cvS", "slope_avgS", "slope_cvS", "pink_hab", #"region")
+#model with all indicators
+# slope_avgW + slope_cvW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity + floodplainA +
+# flood_elev + lake_elev + lakeD + glacierA + elev_avgS + elev_cvS + slope_avgS + slope_cvS
+
+#choose variables to subset for model - all indicators >0.3 in PC1 and PC2
+myvar<- c("slope_avgW", "slope_cvW", "elev_avgW", "elev_cvW", "forest", "shrub", "wetland", "ccomplexity", "sinuosity", "floodplainA", "flood_elev", "lake_elev", "glacierA","elev_avgS", "elev_cvS", "slope_avgS", "slope_cvS", "chinook_hab", "region")
+
+chinooksub <- pcout[myvar]
+chart.Correlation(chinooksub, histogram=TRUE, pch=19)
+
+fitchinook <- lm(chinook_hab ~ slope_avgW + slope_cvW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity + floodplainA + flood_elev + lake_elev + glacierA + elev_avgS + elev_cvS + slope_avgS + slope_cvS , data = chinooksub)
+
+stepchinook <- stepAIC(fitchinook, direction="both")
+stepchinook$anova
+summary (stepchinook)
+
+#all subsets stepwise model was used to identify fixed effects for random model. First check VIF for multicollinearity.
+
+library(car)
+vif(lm(chinook_hab ~ slope_avgW + slope_cvW + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity +
+         flood_elev + glacierA + elev_avgS + elev_cvS + slope_avgS + slope_cvS, data=chinooksub))
+
+#remove slope_cvW
+vif(lm(chinook_hab ~ slope_avgW  + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity +
+         flood_elev + glacierA + elev_avgS + elev_cvS + slope_avgS + slope_cvS, data=chinooksub))
+#remove elev_avgS
+vif(lm(chinook_hab ~ slope_avgW  + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity +
+         flood_elev + glacierA + elev_cvS + slope_avgS + slope_cvS, data=chinooksub))
+
+library(lme4)
+fitchinook2 <- lmer(chinook_hab ~ slope_avgW  + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity +
+         flood_elev + glacierA + elev_cvS + slope_avgS + slope_cvS + (1|region), data=chinooksub)
+summary(fitchinook2)
+
+# Get R2 for linear mixed effects model (lme4)
+library(piecewiseSEM)
+r2chinook <- rsquared(lme4::lmer(chinook_hab ~ slope_avgW  + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity +
+         flood_elev + glacierA + elev_cvS + slope_avgS + slope_cvS + (1|region), data=chinooksub))
+# report marginal and conditional r2 (package= piecewiseSEM) 
+#Marginal = proportion of variance explained by fixed
+#conditional = proportion of variance explained by both fixed and random
+
+View(r2chinook)
+```
 
 ```{r,  warning=FALSE,  message=FALSE}
 #vector arrows by phab
@@ -175,36 +229,27 @@ fviz_pca_biplot(res.pca, geom.ind = "none", axes = c(1,2),
 
 ```
 
-```{r ,  warning=FALSE,  message=FALSE}
 
-fitpink <- lm(pink_hab ~ PC1 + PC2 , data = pcout)
-summary(fitpink)
+```{r}
+#predict on full dataframe
+pink_pred <- predict(fit2, pca)
+pink_out <- cbind(pca,pink_pred) 
+pink_out$pink_pred2=(pink_out$pink_pred*100)
+pink_out$pink_hab2 = (pink_out$pink_hab*100)
+View(pink_out)
 
-print(res.pca)
+ggplot(pink_out, aes(x=pink_pred, y=pink_hab)) + geom_point()
 
-myvarz <- c("slope_avgW", "slope_cvW" , "elev_avgW" , "wetland", "slope_avgS", "ccomplexity","sinuosity", "flood_elev", "elev_avgS",
-            "forest", "shrub", "floodplainA", "elev_cvS", "pink_hab")
-pinksub <- pcout[myvarz]
-chart.Correlation(pinksub, histogram=TRUE, pch=19)
+pink_pred <- predict(fit3, pca)
+pink_out <- cbind(pca,pink_pred) 
+pink_out$pink_pred2=(pink_out$pink_pred*100)
+pink_out$pink_hab2 = (pink_out$pink_hab*100)
+View(pink_out)
 
-fitpink <- lm(pink_hab ~ slope_avgW + slope_cvW + elev_avgW + wetland + slope_avgS + ccomplexity + sinuosity + flood_elev + elev_avgS +
-            forest + shrub + floodplainA + elev_cvS , data = pinksub)
-
-
-steppink <- stepAIC(fitpink, direction="both")
-steppink$anova
-summary (steppink)
-
-vif(lm(pink_hab ~ slope_avgW + slope_cvW + elev_avgW + wetland + slope_avgS + ccomplexity + sinuosity + flood_elev + elev_avgS +
-            forest + shrub + floodplainA + elev_cvS , data = pinksub))
-
-fitsock2 <- lm(sockeye_hab ~ slope_avgW  + elev_avgW + wetland + slope_avgS + elev_cvS + ccomplexity + forest + shrub  + lakeD , data = socksub)
-summary(fitsock2)
-vif(lm(sockeye_hab ~ slope_avgW  + elev_avgW + wetland + slope_avgS + elev_cvS + ccomplexity + forest + shrub  + lakeD , data = socksub))
-
-fitsock3 <- lm(sockeye_hab ~ slope_avgW  + wetland + slope_avgS +  ccomplexity + forest + shrub  + lakeD , data = socksub)
-summary(fitsock3)
+ggplot(pink_out, aes(x=pink_pred, y=pink_hab)) + geom_point()
 
 
-
+#write.csv(pink_out, file="C:/Habitat_Diversity/Analysis/Data/pred_pink.csv")
 ```
+
+
