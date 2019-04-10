@@ -48,11 +48,24 @@ Phab8 <- left_join (Phab5, huchab, by="id_numeric")
 
 #View(Phab)
 Phab <- Phab8[complete.cases(Phab8$chinook_km),]
+dim(Phab)
+#delete old stream reach indicators
+Phab$elev_avgS=NULL
+Phab$elev_cvS=NULL
+Phab$slope_avgS=NULL
+Phab$slope_cvS=NULL
+dim(Phab)
+names(Phab)
 
+#replace stream reach indicators with species specific elevation and slope indicators
+chin <- read_csv("C:/Habitat_Diversity/Analysis/Data/stream_indicators/chin_stream_indicators.csv")
+Phab <- left_join(Phab, chin, by="id_numeric")
+dim(Phab)
+View(Phab)
 #exclude character variables and redundant for PCA
 
 exclude <- c("name", "region", "id_numeric", "region_id",  "coho_km", "coho_hab",
-             "X1", "chinook_km", "chinook_hab", "chum_km", "chum_hab", "pink_km", "pink_hab","sockeye_km", "sockeye_hab")
+             "X1", "chinook_km", "chinook_hab", "chum_km", "chum_hab", "pink_km", "pink_hab","sockeye_km", "sockeye_hab", "X1.y", "X1.x")
      
 exclude2 <- c("coho_km", "coho_hab", "X1", "chinook_km", "chinook_hab", "chum_km", "chum_hab", "pink_km", "pink_hab",
               "sockeye_km", "sockeye_hab")
@@ -65,6 +78,7 @@ Phab33 <- left_join(Phab22, huchab, by="id_numeric")
 
 ```{r, include=FALSE, warning=FALSE,  message=FALSE}
 ##PCA Analysis
+
 Phab9 <- Phab[,!names(Phab) %in% exclude]
 Phab99 <- Phab9[complete.cases(Phab9),] 
 
@@ -93,7 +107,7 @@ print(res.pca)
 #write.csv(loadings, file="C:/Habitat_Diversity/Analysis/Data/Var_loadings.csv")
 
 #export csv with scores by huc and region
-write.csv(pcout, file="C:/Habitat_Diversity/Analysis/Data/PCout_chinook.csv")
+write.csv(pcout, file="C:/Habitat_Diversity/Analysis/Data/O2_chinook_PCout.csv")
 
 screeplot(res.pca, bstick=TRUE, type="lines")
 
@@ -130,25 +144,25 @@ summary (stepchinook)
 #all subsets stepwise model was used to identify fixed effects for random model. First check VIF for multicollinearity.
 
 library(car)
-vif(lm(chinook_hab ~ slope_avgW + slope_cvW + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity +
-         flood_elev + glacierA + elev_avgS + elev_cvS + slope_avgS + slope_cvS, data=chinooksub))
+vif(lm(chinook_hab ~ slope_avgW + slope_cvW + elev_cvW + elev_avgW + forest + shrub + wetland + sinuosity +
+         glacierA + elev_avgS + elev_cvS , data=chinooksub))
 
 #remove slope_cvW
-vif(lm(chinook_hab ~ slope_avgW  + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity +
-         flood_elev + glacierA + elev_avgS + elev_cvS + slope_avgS + slope_cvS, data=chinooksub))
-#remove elev_avgS
-vif(lm(chinook_hab ~ slope_avgW  + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity +
-         flood_elev + glacierA + elev_cvS + slope_avgS + slope_cvS, data=chinooksub))
+vif(lm(chinook_hab ~ slope_avgW + elev_cvW + elev_avgW + forest + shrub + wetland + sinuosity +
+         glacierA + elev_avgS + elev_cvS, data=chinooksub))
+#remove elev_avgW
+vif(lm(chinook_hab ~ slope_avgW + elev_cvW + forest + shrub + wetland + sinuosity +
+         glacierA + elev_avgS + elev_cvS, data=chinooksub))
 
 library(lme4)
-fitchinook2 <- lmer(chinook_hab ~ slope_avgW  + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity +
-         flood_elev + glacierA + elev_cvS + slope_avgS + slope_cvS + (1|region), data=chinooksub)
+fitchinook2 <- lmer(chinook_hab ~ slope_avgW + elev_cvW + forest + shrub + wetland + sinuosity +
+         glacierA + elev_avgS + elev_cvS + (1|region), data=chinooksub)
 summary(fitchinook2)
 
 # Get R2 for linear mixed effects model (lme4)
 library(piecewiseSEM)
-r2chinook <- rsquared(lme4::lmer(chinook_hab ~ slope_avgW  + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity +
-         flood_elev + glacierA + elev_cvS + slope_avgS + slope_cvS + (1|region), data=chinooksub))
+r2chinook <- rsquared(lme4::lmer(chinook_hab ~ slope_avgW + elev_cvW + forest + shrub + wetland + sinuosity +
+         glacierA + elev_avgS + elev_cvS + (1|region), data=chinooksub))
 # report marginal and conditional r2 (package= piecewiseSEM) 
 #Marginal = proportion of variance explained by fixed
 #conditional = proportion of variance explained by both fixed and random

@@ -48,11 +48,28 @@ Phab8 <- left_join (Phab5, huchab, by="id_numeric")
 
 #View(Phab)
 Phab <- Phab8[complete.cases(Phab8$pink_km),]
+dim(Phab)
+#delete old stream reach indicators
+Phab$elev_avgS=NULL
+Phab$elev_cvS=NULL
+Phab$slope_avgS=NULL
+Phab$slope_cvS=NULL
+dim(Phab)
+names(Phab)
+
+#replace stream reach indicators with species specific elevation and slope indicators
+pink <- read_csv("C:/Habitat_Diversity/Analysis/Data/stream_indicators/pink_stream_indicators.csv")
+Phab <- left_join(Phab, pink, by="id_numeric")
+
+# remove huc=19080101 bc pink_km<1 and no SS stream reach indicator
+Phab <- Phab %>% filter(!id_numeric==19050101)
+dim(Phab)
+#View(Phab)
 
 #exclude character variables and redundant for PCA
 
 exclude <- c("name", "region", "id_numeric", "region_id",  "coho_km", "coho_hab",
-             "X1", "chinook_km", "chinook_hab", "chum_km", "chum_hab", "pink_km", "pink_hab","sockeye_km", "sockeye_hab")
+             "X1", "chinook_km", "chinook_hab", "chum_km", "chum_hab", "pink_km", "pink_hab","sockeye_km", "sockeye_hab", "X1.y", "X1.x")
      
 exclude2 <- c("coho_km", "coho_hab", "X1", "chinook_km", "chinook_hab", "chum_km", "chum_hab", "pink_km", "pink_hab",
               "sockeye_km", "sockeye_hab")
@@ -71,7 +88,7 @@ Phab99 <- Phab9[complete.cases(Phab9),]
 skew <- skewness(Phab99)
 
 Phabm<-scale(Phab99, scale=TRUE, center=TRUE)
-View(Phabm)
+#View(Phabm)
 
 #compute PCA - all data
 res.pca <- prcomp(Phabm, scale = FALSE)
@@ -95,7 +112,7 @@ print(res.pca)
 #write.csv(loadings, file="C:/Habitat_Diversity/Analysis/Data/Var_loadings.csv")
 
 #export csv with scores by huc and region
-write.csv(pcout, file="C:/Habitat_Diversity/Analysis/Data/PCout_pink.csv")
+write.csv(pcout, file="C:/Habitat_Diversity/Analysis/Data/O2_pink_PCout.csv")
 
 #broken stick
 screeplot(res.pca, bstick=TRUE, type="lines")
@@ -108,6 +125,10 @@ Indicator coordinates for PC1 and PC2 > 0.3 is everything except lakeD - model 1
 #r2=0.13 - not good model fit with PC scores will build species specific models with habitat indicators
 #fitpink2 <- lm(pink_hab ~ PC1 + PC2 + PC3 , data = pcout)
 #summary(fitpink2)
+
+#Figure for Objective 3
+fviz_pca_ind(res.pca, geom.ind = "", axes = c(1,2), 
+             repel = TRUE, habillage = Phab22$region, addEllipses = TRUE)
 
 print(res.pca)
 
@@ -136,24 +157,28 @@ summary (steppink)
 #all subsets stepwise model was used to identify fixed effects for random model. First check VIF for multicollinearity.
 
 library(car)
-vif(lm(pink_hab ~ slope_avgW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity, data=pinksub))
-#all VIF<5 so ok.
+vif(lm(pink_hab ~ slope_avgW + elev_avgW  + forest + shrub + wetland + floodplainA + glacierA + elev_avgS
+       + elev_cvS, data=pinksub))
+#remove elev_avgW bc VIF >5
+vif(lm(pink_hab ~ slope_avgW + forest + shrub + wetland + floodplainA + glacierA + elev_avgS
+       + elev_cvS, data=pinksub))
 
 library(lme4)
-fitpink2 <- lmer(pink_hab ~ slope_avgW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity + (1|region) , data = pinksub)
+fitpink2 <- lmer(pink_hab ~ slope_avgW + forest + shrub + wetland + floodplainA + glacierA + elev_avgS
+       + elev_cvS + (1|region) , data = pinksub)
 summary(fitpink2)
-library(piecewiseSEM)
+
 # Get R2 for linear mixed effects model (lme4)
-r2pink <- rsquared(lme4::lmer(pink_hab ~ slope_avgW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity + (1|region) , data = pinksub))
 # report marginal and conditional r2 (package= piecewiseSEM) 
 #Marginal = proportion of variance explained by fixed
 #conditional = proportion of variance explained by both fixed and random
-
+library(piecewiseSEM)
+r2pink <- rsquared(lme4::lmer(pink_hab ~ slope_avgW + forest + shrub + wetland + floodplainA + glacierA + elev_avgS
+       + elev_cvS + (1|region), data=pinksub))
 View(r2pink)
 
-
-
 ```
+
 ```{r}
 #predict on full dataframe
 pink_pred <- predict(fit2, pca)

@@ -41,18 +41,32 @@ setwd ("C:/Habitat_Diversity/Analysis")
 ```{r, warning=FALSE, results='hide', message=FALSE}
 ##Data management
 #load data
-Phab5 <- read_csv("C:/Habitat_Diversity/HUC_data/HUC_habitatData.csv")
+Phab5 <- read_csv("C:/Habitat_Diversity/HUC_data/HUC_habitatData_031819.csv")
 #View(Phab5)
 huchab <- read_csv("C:/Habitat_Diversity/Analysis/Data/Huc_habitat.csv")
 Phab8 <- left_join (Phab5, huchab, by="id_numeric")
 
 #View(Phab)
 Phab <- Phab8[complete.cases(Phab8$coho_km),]
+dim(Phab)
+#delete old stream reach indicators
+Phab$elev_avgS=NULL
+Phab$elev_cvS=NULL
+Phab$slope_avgS=NULL
+Phab$slope_cvS=NULL
+dim(Phab)
+names(Phab)
+
+#replace stream reach indicators with species specific elevation and slope indicators
+coho <- read_csv("C:/Habitat_Diversity/Analysis/Data/stream_indicators/coho_stream_indicators.csv")
+Phab <- left_join(Phab, coho, by="id_numeric")
+dim(Phab)
+View(Phab)
 
 #exclude character variables and redundant for PCA
 
 exclude <- c("name", "region", "id_numeric", "region_id",  "coho_km", "coho_hab",
-             "X1", "chinook_km", "chinook_hab", "chum_km", "chum_hab", "pink_km", "pink_hab","sockeye_km", "sockeye_hab")
+             "X1", "chinook_km", "chinook_hab", "chum_km", "chum_hab", "pink_km", "pink_hab","sockeye_km", "sockeye_hab", "X1.y", "X1.x")
      
 exclude2 <- c("coho_km", "coho_hab", "X1", "chinook_km", "chinook_hab", "chum_km", "chum_hab", "pink_km", "pink_hab",
               "sockeye_km", "sockeye_hab")
@@ -71,7 +85,7 @@ Phab99 <- Phab9[complete.cases(Phab9),]
 skew <- skewness(Phab99)
 
 Phabm<-scale(Phab99, scale=TRUE, center=TRUE)
-#View(Phabm)
+View(Phabm)
 
 #compute PCA - all data
 res.pca <- prcomp(Phabm, scale = FALSE)
@@ -103,7 +117,7 @@ ggplot(pcout, aes(x=PC2, y=sockeye_km)) + geom_point()
 ggplot(pcout, aes(x=PC1, y=chinook_km)) + geom_point()
 
 #export csv with scores by huc and region
-write.csv(pcout, file="C:/Habitat_Diversity/Analysis/Data/PCout_coho.csv")
+write.csv(pcout, file="C:/Habitat_Diversity/Analysis/Data/O2_coho_PCout.csv")
 
 screeplot(res.pca, bstick=TRUE, type="lines")
 
@@ -111,6 +125,64 @@ screeplot(res.pca, bstick=TRUE, type="lines")
 
 ```
 
+```{r ,  warning=FALSE,  message=FALSE}
+
+#Figure for Objective 3
+fviz_pca_ind(res.pca, geom.ind = "", axes = c(1,2), 
+             repel = TRUE, habillage = Phab22$region, addEllipses = TRUE)
+
+print(res.pca)
+
+#Use habitat indicator coordinates to select indicators for model - choose all indicators > 0.3
+pcvar <- get_pca_var(res.pca)
+write.csv(pcvar$coord, file="C:/Habitat_Diversity/Analysis/Data/coho_indicator_scores.csv")
+
+#FULL LIST
+#myvar<- c("slope_avgW", "slope_cvW", "elev_avgW", "elev_cvW", "forest", "shrub", "wetland", "ccomplexity", "sinuosity", #"floodplainA", "flood_elev", "lake_elev", "lakeD", "glacierA","elev_avgS", "elev_cvS", "slope_avgS", "slope_cvS", "pink_hab", #"region")
+#model with all indicators
+# slope_avgW + slope_cvW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity + floodplainA +
+# flood_elev + lake_elev + lakeD + glacierA + elev_avgS + elev_cvS + slope_avgS + slope_cvS
+
+#choose variables to subset for model - all indicators >0.3 in PC1 and PC2
+myvar<- c("slope_avgW", "slope_cvW", "elev_avgW", "elev_cvW", "forest", "shrub", "wetland", "ccomplexity", "sinuosity", "floodplainA", "flood_elev", "lake_elev", "glacierA","elev_avgS", "elev_cvS", "slope_avgS", "slope_cvS", "coho_hab", "region")
+
+cohosub <- pcout[myvar]
+chart.Correlation(cohosub, histogram=TRUE, pch=19)
+
+fitcoho <- lm(coho_hab ~ slope_avgW + slope_cvW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity + floodplainA + flood_elev + lake_elev + glacierA + elev_avgS + elev_cvS + slope_avgS + slope_cvS , data = cohosub)
+
+stepcoho <- stepAIC(fitcoho, direction="both")
+stepcoho$anova
+summary (stepcoho)
+
+#all subsets stepwise model was used to identify fixed effects for random model. First check VIF for multicollinearity.
+
+library(car)
+vif(lm(coho_hab ~ slope_avgW + slope_cvW + elev_avgW  + elev_cvW + forest + shrub + wetland + floodplainA + 
+         flood_elev + glacierA + elev_avgS + elev_cvS , data=cohosub))
+#remove elev_avgW bc VIF >5
+vif(lm(coho_hab ~ slope_avgW + slope_cvW  + elev_cvW + forest + shrub + wetland + floodplainA + 
+         flood_elev + glacierA + elev_avgS + elev_cvS, data=cohosub))
+#remove slope_cvW bc VIF >5
+vif(lm(coho_hab ~ slope_avgW +  elev_cvW + forest + shrub + wetland + floodplainA + 
+         flood_elev + glacierA + elev_avgS + elev_cvS, data=cohosub))
+
+library(lme4)
+fitcoho2 <- lmer(coho_hab ~ slope_avgW +  elev_cvW + forest + shrub + wetland + floodplainA + 
+         flood_elev + glacierA + elev_avgS + elev_cvS + (1|region) , data = cohosub)
+summary(fitcoho2)
+
+# Get R2 for linear mixed effects model (lme4)
+# report marginal and conditional r2 (package= piecewiseSEM) 
+#Marginal = proportion of variance explained by fixed
+#conditional = proportion of variance explained by both fixed and random
+library(piecewiseSEM)
+r2coho <- rsquared(lme4::lmer(coho_hab ~ slope_avgW +  elev_cvW + forest + shrub + wetland + floodplainA + 
+         flood_elev + glacierA + elev_avgS + elev_cvS + (1|region), data=cohosub))
+
+View(r2coho)
+
+```
 
 ```{r,  warning=FALSE,  message=FALSE}
 #vector arrows by phab

@@ -1,0 +1,143 @@
+---
+title: "O3 Species Specific Stream Indicators"
+author: "Leslie Jones"
+date: "April 9, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Import datasets and merge dem and slope for each species to be used in O3 SSHD and SS PCAs
+
+```{r }
+#PINK
+pink_dem <- read.table("C:/Habitat_Diversity/Analysis/Data/stream_indicators/pink_hucs_dem.txt", header = TRUE, sep=",")
+pink_dem$elev_cvS = pink_dem$STD/pink_dem$MEAN
+pink_dem$elev_avgS <- pink_dem$MEAN
+pink_dem$id_numeric<- pink_dem$ID_NUMERIC
+#View(pink_dem)
+varz <- c("id_numeric", "elev_cvS", "elev_avgS")
+pink_dem2 <- pink_dem[varz]
+#View(pink_dem2)
+
+pink_slp <- read.table("C:/Habitat_Diversity/Analysis/Data/stream_indicators/pink_hucs_slope.txt", header = TRUE, sep=",")
+pink_slp$slope_cvS = pink_slp$STD/pink_slp$MEAN
+pink_slp$slope_avgS <- pink_slp$MEAN
+pink_slp$id_numeric<- pink_slp$ID_NUMERIC
+#View(pink_slp)
+varz <- c("id_numeric", "slope_cvS", "slope_avgS")
+pink_slp2 <- pink_slp[varz]
+#View(pink_slp2)
+
+#merge slope and dem for pink
+pink <- left_join (pink_dem2, pink_slp2, by="id_numeric")
+View(pink)
+write.csv(pink, file="C:/Habitat_Diversity/Analysis/Data/stream_indicators/pink_stream_indicators.csv")
+
+```
+
+```{r }
+#COHO
+coho_dem <- read.table("C:/Habitat_Diversity/Analysis/Data/stream_indicators/coho_hucs_dem.txt", header = TRUE, sep=",")
+coho_dem$elev_cvS = coho_dem$STD/coho_dem$MEAN
+coho_dem$elev_avgS <- coho_dem$MEAN
+coho_dem$id_numeric<- coho_dem$ID_NUMERIC
+#View(coho_dem)
+varz <- c("id_numeric", "elev_cvS", "elev_avgS")
+coho_dem2 <- coho_dem[varz]
+View(coho_dem2)
+
+coho_slp <- read.table("C:/Habitat_Diversity/Analysis/Data/stream_indicators/coho_hucs_slope.txt", header = TRUE, sep=",")
+coho_slp$slope_cvS = coho_slp$STD/coho_slp$MEAN
+coho_slp$slope_avgS <- coho_slp$MEAN
+coho_slp$id_numeric<- coho_slp$ID_NUMERIC
+View(coho_slp)
+varz <- c("id_numeric", "slope_cvS", "slope_avgS")
+coho_slp2 <- coho_slp[varz]
+View(coho_slp2)
+
+#merge slope and dem for coho
+coho <- left_join (coho_dem2, coho_slp2, by="id_numeric")
+View(coho)
+write.csv(coho, file="C:/Habitat_Diversity/Analysis/Data/stream_indicators/coho_stream_indicators.csv")
+```
+
+```{r }
+#CHUM
+chum_dem <- read.table("C:/Habitat_Diversity/Analysis/Data/stream_indicators/chum_hucs_dem.txt", header = TRUE, sep=",")
+chum_dem$elev_cvS = chum_dem$STD/chum_dem$MEAN
+chum_dem$elev_avgS <- chum_dem$MEAN
+chum_dem$id_numeric<- chum_dem$ID_NUMERIC
+View(chum_dem)
+varz <- c("id_numeric", "elev_cvS", "elev_avgS")
+chum_dem2 <- chum_dem[varz]
+View(chum_dem2)
+
+chum_slp <- read.table("C:/Habitat_Diversity/Analysis/Data/stream_indicators/chum_hucs_slope.txt", header = TRUE, sep=",")
+chum_slp$slope_cvS = chum_slp$STD/chum_slp$MEAN
+chum_slp$slope_avgS <- chum_slp$MEAN
+chum_slp$id_numeric<- chum_slp$ID_NUMERIC
+View(chum_slp)
+varz <- c("id_numeric", "slope_cvS", "slope_avgS")
+chum_slp2 <- chum_slp[varz]
+View(chum_slp2)
+
+#merge slope and dem for coho
+chum <- left_join (chum_dem2, chum_slp2, by="id_numeric")
+View(chum)
+write.csv(chum, file="C:/Habitat_Diversity/Analysis/Data/stream_indicators/chum_stream_indicators.csv")
+```
+
+```{r }
+#SOCKEYE
+sock_dem <- read.table("C:/Habitat_Diversity/Analysis/Data/stream_indicators/sock_hucs_dem.txt", header = TRUE, sep=",")
+sock_dem$elev_cvS = sock_dem$STD/sock_dem$MEAN
+sock_dem$elev_avgS <- sock_dem$MEAN
+sock_dem$id_numeric<- sock_dem$ID_NUMERIC
+View(sock_dem)
+varz <- c("id_numeric", "elev_cvS", "elev_avgS")
+sock_dem2 <- sock_dem[varz]
+View(sock_dem2)
+
+sock_slp <- read.table("C:/Habitat_Diversity/Analysis/Data/stream_indicators/sock_hucs_slope.txt", header = TRUE, sep=",")
+sock_slp$slope_cvS = sock_slp$STD/sock_slp$MEAN
+sock_slp$slope_avgS <- sock_slp$MEAN
+sock_slp$id_numeric<- sock_slp$ID_NUMERIC
+View(sock_slp)
+varz <- c("id_numeric", "slope_cvS", "slope_avgS")
+sock_slp2 <- sock_slp[varz]
+View(sock_slp2)
+
+#merge slope and dem for coho
+sock <- left_join (sock_dem2, sock_slp2, by="id_numeric")
+View(sock)
+write.csv(sock, file="C:/Habitat_Diversity/Analysis/Data/stream_indicators/sock_stream_indicators.csv")
+```
+
+```{r }
+#CHINOOK
+chin_dem <- read.table("C:/Habitat_Diversity/Analysis/Data/stream_indicators/chin_hucs_dem.txt", header = TRUE, sep=",")
+chin_dem$elev_cvS = chin_dem$STD/chin_dem$MEAN
+chin_dem$elev_avgS <- chin_dem$MEAN
+chin_dem$id_numeric<- chin_dem$ID_NUMERIC
+View(chin_dem)
+varz <- c("id_numeric", "elev_cvS", "elev_avgS")
+chin_dem2 <- chin_dem[varz]
+View(chin_dem2)
+
+chin_slp <- read.table("C:/Habitat_Diversity/Analysis/Data/stream_indicators/chin_hucs_slope.txt", header = TRUE, sep=",")
+chin_slp$slope_cvS = chin_slp$STD/chin_slp$MEAN
+chin_slp$slope_avgS <- chin_slp$MEAN
+chin_slp$id_numeric<- chin_slp$ID_NUMERIC
+View(chin_slp)
+varz <- c("id_numeric", "slope_cvS", "slope_avgS")
+chin_slp2 <- chin_slp[varz]
+View(chin_slp2)
+
+#merge slope and dem for coho
+chin <- left_join (chin_dem2, chin_slp2, by="id_numeric")
+View(chin)
+write.csv(chin, file="C:/Habitat_Diversity/Analysis/Data/stream_indicators/chin_stream_indicators.csv")
+```
