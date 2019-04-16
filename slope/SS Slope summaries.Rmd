@@ -1,0 +1,27 @@
+---
+title: "Slope summaries for each species"
+author: "Leslie Jones"
+date: "April 10, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(raster)
+library(rgdal)
+setwd("C:/Habitat_Diversity/Analysis/R/slope")
+```
+
+## Slope summaries for each species
+```{r}
+pink_slope <- raster(x= "C:/GIS/Habitat_Diversity/Network_Indicators/pink_slope.tif")
+
+plot(pink_slope, main = "Slope of designate Pink salmon Habitat")
+
+# plot histogram
+hist(pink_slope,
+     main = "Slope of designate Pink salmon Habitat",
+     xlab = "Slope (degrees)", ylab = "Frequency",
+     col = "blue")
+```
+

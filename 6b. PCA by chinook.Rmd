@@ -116,6 +116,9 @@ screeplot(res.pca, bstick=TRUE, type="lines")
 
 Indicator coordinates for PC1 and PC2 > 0.3 is everything except lakeD - model 1
 ```{r ,  warning=FALSE,  message=FALSE}
+#Figure for Objective 3
+#fviz_pca_ind(res.pca, geom.ind = "", axes = c(1,2), 
+ #            repel = TRUE, habillage = Phab22$region, addEllipses = TRUE)
 
 print(res.pca)
 
@@ -133,7 +136,7 @@ write.csv(pcvar$coord, file="C:/Habitat_Diversity/Analysis/Data/Chinook_indicato
 myvar<- c("slope_avgW", "slope_cvW", "elev_avgW", "elev_cvW", "forest", "shrub", "wetland", "ccomplexity", "sinuosity", "floodplainA", "flood_elev", "lake_elev", "glacierA","elev_avgS", "elev_cvS", "slope_avgS", "slope_cvS", "chinook_hab", "region")
 
 chinooksub <- pcout[myvar]
-chart.Correlation(chinooksub, histogram=TRUE, pch=19)
+#chart.Correlation(chinooksub, histogram=TRUE, pch=19)
 
 fitchinook <- lm(chinook_hab ~ slope_avgW + slope_cvW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity + floodplainA + flood_elev + lake_elev + glacierA + elev_avgS + elev_cvS + slope_avgS + slope_cvS , data = chinooksub)
 
@@ -170,6 +173,34 @@ r2chinook <- rsquared(lme4::lmer(chinook_hab ~ slope_avgW + elev_cvW + forest + 
 View(r2chinook)
 ```
 
+#Make predictions from specified model
+```{r}
+Phab3 <- read.csv("C:/Habitat_Diversity/Analysis/Data/stream_indicators/prediction_dataframe.csv")
+View(Phab3)
+#test for fixed effects only
+#test <- lm(chinook_hab ~ slope_avgW + elev_cvW + forest + shrub + wetland + sinuosity +
+         #glacierA + elev_avgS + elev_cvS, data=chinooksub)
+#test_pred <- predict(test, Phab3, allow.new.levels=TRUE)
+#test_out <- cbind(Phab3,test_pred)
+#View(test_out)
+#predict on full dataframe
+chin_pred <- predict(fitchinook2, Phab3, allow.new.levels=TRUE)
+View(chin_pred)
+chin_out <- cbind(Phab3,chin_pred) 
+View(chin_out)
+chin_out$chin_pred2=(chin_out$chin_pred*100)
+chin_out$chin_hab2 = (chin_out$chinook_hab*100)
+chin_out$chin_diff = (chin_out$chinook_hab - chin_out$chin_pred)
+View(chin_out)
+chin_out2 <- chin_out
+
+ggplot(chin_out2, aes(x=chin_pred, y=chinook_hab)) + geom_point()
+
+#export this and join with watersheds in arcgis
+write.csv(chin_out2, file="C:/Habitat_Diversity/Analysis/Data/pred_chinook.csv")
+```
+
+#Plots from species specific PCA
 ```{r,  warning=FALSE,  message=FALSE}
 #vector arrows by phab
 fviz_pca_var(res.pca,

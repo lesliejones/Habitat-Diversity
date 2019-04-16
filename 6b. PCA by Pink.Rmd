@@ -146,7 +146,7 @@ write.csv(pcvar$coord, file="C:/Habitat_Diversity/Analysis/Data/Pink_indicator_s
 myvar<- c("slope_avgW", "slope_cvW", "elev_avgW", "elev_cvW", "forest", "shrub", "wetland", "ccomplexity", "sinuosity", "floodplainA", "flood_elev", "lake_elev", "glacierA","elev_avgS", "elev_cvS", "slope_avgS", "slope_cvS", "pink_hab", "region")
 
 pinksub <- pcout[myvar]
-chart.Correlation(pinksub, histogram=TRUE, pch=19)
+#chart.Correlation(pinksub, histogram=TRUE, pch=19)
 
 fitpink <- lm(pink_hab ~ slope_avgW + slope_cvW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity + floodplainA + flood_elev + lake_elev + glacierA + elev_avgS + elev_cvS + slope_avgS + slope_cvS , data = pinksub)
 
@@ -179,26 +179,25 @@ View(r2pink)
 
 ```
 
+#Make predictions from specified model
 ```{r}
+Phab3 <- read.csv("C:/Habitat_Diversity/Analysis/Data/stream_indicators/prediction_dataframe.csv")
+View(Phab3)
 #predict on full dataframe
-pink_pred <- predict(fit2, pca)
-pink_out <- cbind(pca,pink_pred) 
+pink_pred <- predict(fitpink2, Phab3, allow.new.levels=TRUE)
+View(pink_pred)
+pink_out <- cbind(Phab3,pink_pred) 
+View(pink_out)
 pink_out$pink_pred2=(pink_out$pink_pred*100)
 pink_out$pink_hab2 = (pink_out$pink_hab*100)
+pink_out$pink_diff = (pink_out$pink_hab - pink_out$pink_pred)
 View(pink_out)
+pink_out2 <- pink_out
 
-ggplot(pink_out, aes(x=pink_pred, y=pink_hab)) + geom_point()
+ggplot(pink_out2, aes(x=pink_pred, y=pink_hab)) + geom_point()
 
-pink_pred <- predict(fit3, pca)
-pink_out <- cbind(pca,pink_pred) 
-pink_out$pink_pred2=(pink_out$pink_pred*100)
-pink_out$pink_hab2 = (pink_out$pink_hab*100)
-View(pink_out)
-
-ggplot(pink_out, aes(x=pink_pred, y=pink_hab)) + geom_point()
-
-
-#write.csv(pink_out, file="C:/Habitat_Diversity/Analysis/Data/pred_pink.csv")
+#export this and join with watersheds in arcgis
+write.csv(pink_out2, file="C:/Habitat_Diversity/Analysis/Data/pred_pink.csv")
 ```
 
 ```{r,  warning=FALSE,  message=FALSE}

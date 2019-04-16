@@ -1,0 +1,62 @@
+---
+title: "O4 Stream Reach Indicators for prediction"
+author: "Leslie Jones"
+date: "April 15, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Subset slope network raster for slope values < 10% (5.8 degrees). Summarized this by HUC. These will be used to predict habitat potential for watersheds. masked dem with slope less than 10% raster and summarized by HUC. All stream reach covaritates will be used in predictions.
+
+
+```{r }
+#SLOPE 
+pred_dem <- read.table("C:/Habitat_Diversity/Analysis/Data/stream_indicators/dem_slope10p.txt", header = TRUE, sep=",")
+pred_dem$elev_cvS = pred_dem$STD/pred_dem$MEAN
+pred_dem$elev_avgS <- pred_dem$MEAN
+pred_dem$id_numeric<- pred_dem$ID_NUMERIC
+#View(pred_dem)
+varz <- c("id_numeric", "elev_cvS", "elev_avgS")
+pred_dem2 <- pred_dem[varz]
+#View(pred_dem2)
+dim(pred_dem2)
+
+pred_slp <- read.table("C:/Habitat_Diversity/Analysis/Data/stream_indicators/slope_less10p.txt", header = TRUE, sep=",")
+pred_slp$slope_cvS = pred_slp$STD/pred_slp$MEAN
+pred_slp$slope_avgS <- pred_slp$MEAN
+pred_slp$id_numeric<- pred_slp$ID_NUMERIC
+#View(pred_slp)
+varz <- c("id_numeric", "slope_cvS", "slope_avgS")
+pred_slp2 <- pred_slp[varz]
+#View(pred_slp2)
+dim(pred_slp2)
+
+#merge slope and dem 
+pred <- left_join (pred_dem2, pred_slp2, by="id_numeric")
+#View(pred)
+dim(pred)
+
+Phab <- read_csv("C:/Habitat_Diversity/HUC_data/HUC_habitatData_031819.csv")
+#delete old stream reach indicators
+Phab$elev_avgS=NULL
+Phab$elev_cvS=NULL
+Phab$slope_avgS=NULL
+Phab$slope_cvS=NULL
+#View(Phab)
+dim(Phab)
+#join habitat density values
+huchab <- read_csv("C:/Habitat_Diversity/Analysis/Data/Huc_habitat.csv")
+Phab2 <- left_join (Phab, huchab, by="id_numeric")
+dim(Phab3)
+
+Phab3 <- left_join (pred, Phab2, by="id_numeric")
+dim(Phab3)
+#View(Phab2)
+write.csv(Phab3,"C:/Habitat_Diversity/Analysis/Data/stream_indicators/prediction_dataframe.csv" )
+
+```
+
+

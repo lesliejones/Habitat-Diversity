@@ -137,7 +137,7 @@ write.csv(pcvar$coord, file="C:/Habitat_Diversity/Analysis/Data/chum_indicator_s
 myvar<- c("slope_avgW", "slope_cvW", "elev_avgW", "elev_cvW", "forest", "shrub", "wetland", "ccomplexity", "sinuosity", "floodplainA", "flood_elev", "lake_elev", "glacierA","elev_avgS", "elev_cvS", "slope_avgS", "slope_cvS", "chum_hab", "region")
 
 chumsub <- pcout[myvar]
-chart.Correlation(chumsub, histogram=TRUE, pch=19)
+#chart.Correlation(chumsub, histogram=TRUE, pch=19)
 
 fitchum <- lm(chum_hab ~ slope_avgW + slope_cvW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity + floodplainA + flood_elev + lake_elev + glacierA + elev_avgS + elev_cvS + slope_avgS + slope_cvS , data = chumsub)
 
@@ -169,7 +169,26 @@ r2chum <- rsquared(lme4::lmer(chum_hab ~ slope_avgW  + forest + shrub + ccomplex
 View(r2chum)
 
 ```
+#Make predictions from specified model
+```{r}
+Phab3 <- read.csv("C:/Habitat_Diversity/Analysis/Data/stream_indicators/prediction_dataframe.csv")
+View(Phab3)
+#predict on full dataframe
+chum_pred <- predict(fitchum2, Phab3, allow.new.levels=TRUE)
+View(chum_pred)
+chum_out <- cbind(Phab3,chum_pred) 
+View(chum_out)
+chum_out$chum_pred2=(chum_out$chum_pred*100)
+chum_out$chum_hab2 = (chum_out$chum_hab*100)
+chum_out$chum_diff = (chum_out$chum_hab - chum_out$chum_pred)
+View(chum_out)
+chum_out2 <- chum_out
 
+ggplot(chum_out2, aes(x=chum_pred, y=chum_hab)) + geom_point()
+
+#export this and join with watersheds in arcgis
+write.csv(chum_out2, file="C:/Habitat_Diversity/Analysis/Data/pred_chum.csv")
+```
 
 
 ```{r,  warning=FALSE,  message=FALSE}
@@ -247,34 +266,4 @@ fviz_pca_biplot(res.pca, geom.ind = "none", axes = c(1,2),
 
 ```
 
-```{r ,  warning=FALSE,  message=FALSE}
-fitpink <- lm(pink_hab ~ PC1 + PC2 , data = pcout)
-summary(fitpink)
 
-print(res.pca)
-myvarz <- c("slope_avgW", "slope_cvW" , "elev_avgW" , "wetland", "slope_avgS", "ccomplexity","sinuosity", "flood_elev", "elev_avgS",
-            "forest", "shrub", "floodplainA", "elev_cvS", "pink_hab")
-pinksub <- pcout[myvarz]
-chart.Correlation(pinksub, histogram=TRUE, pch=19)
-
-fitpink <- lm(pink_hab ~ slope_avgW + slope_cvW + elev_avgW + wetland + slope_avgS + ccomplexity + sinuosity + flood_elev + elev_avgS +
-            forest + shrub + floodplainA + elev_cvS , data = pinksub)
-
-
-steppink <- stepAIC(fitpink, direction="both")
-steppink$anova
-summary (steppink)
-
-vif(lm(pink_hab ~ slope_avgW + slope_cvW + elev_avgW + wetland + slope_avgS + ccomplexity + sinuosity + flood_elev + elev_avgS +
-            forest + shrub + floodplainA + elev_cvS , data = pinksub))
-
-fitsock2 <- lm(sockeye_hab ~ slope_avgW  + elev_avgW + wetland + slope_avgS + elev_cvS + ccomplexity + forest + shrub  + lakeD , data = socksub)
-summary(fitsock2)
-vif(lm(sockeye_hab ~ slope_avgW  + elev_avgW + wetland + slope_avgS + elev_cvS + ccomplexity + forest + shrub  + lakeD , data = socksub))
-
-fitsock3 <- lm(sockeye_hab ~ slope_avgW  + wetland + slope_avgS +  ccomplexity + forest + shrub  + lakeD , data = socksub)
-summary(fitsock3)
-
-
-
-```

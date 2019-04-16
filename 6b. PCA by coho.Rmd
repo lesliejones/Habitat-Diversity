@@ -147,7 +147,7 @@ write.csv(pcvar$coord, file="C:/Habitat_Diversity/Analysis/Data/coho_indicator_s
 myvar<- c("slope_avgW", "slope_cvW", "elev_avgW", "elev_cvW", "forest", "shrub", "wetland", "ccomplexity", "sinuosity", "floodplainA", "flood_elev", "lake_elev", "glacierA","elev_avgS", "elev_cvS", "slope_avgS", "slope_cvS", "coho_hab", "region")
 
 cohosub <- pcout[myvar]
-chart.Correlation(cohosub, histogram=TRUE, pch=19)
+#chart.Correlation(cohosub, histogram=TRUE, pch=19)
 
 fitcoho <- lm(coho_hab ~ slope_avgW + slope_cvW + elev_avgW + elev_cvW + forest + shrub + wetland + ccomplexity + sinuosity + floodplainA + flood_elev + lake_elev + glacierA + elev_avgS + elev_cvS + slope_avgS + slope_cvS , data = cohosub)
 
@@ -183,7 +183,27 @@ r2coho <- rsquared(lme4::lmer(coho_hab ~ slope_avgW +  elev_cvW + forest + shrub
 View(r2coho)
 
 ```
+#Make predictions from specified model
+```{r}
+Phab3 <- read.csv("C:/Habitat_Diversity/Analysis/Data/stream_indicators/prediction_dataframe.csv")
+View(Phab3)
+#predict on full dataframe
+coho_pred <- predict(fitcoho2, Phab3, allow.new.levels=TRUE)
+View(coho_pred)
+coho_out <- cbind(Phab3,coho_pred) 
+View(coho_out)
+coho_out$coho_pred2=(coho_out$coho_pred*100)
+coho_out$coho_hab2 = (coho_out$coho_hab*100)
+coho_out$coho_diff = (coho_out$coho_hab - coho_out$coho_pred)
+View(coho_out)
+coho_out2 <- coho_out
 
+ggplot(coho_out2, aes(x=coho_pred, y=coho_hab)) + geom_point()
+
+#export this and join with watersheds in arcgis
+write.csv(coho_out2, file="C:/Habitat_Diversity/Analysis/Data/pred_coho.csv")
+```
+#PCA plots
 ```{r,  warning=FALSE,  message=FALSE}
 #vector arrows by phab
 fviz_pca_var(res.pca,
@@ -257,36 +277,3 @@ fviz_pca_biplot(res.pca, geom.ind = "none", axes = c(1,2),
 
 ```
 
-```{r ,  warning=FALSE,  message=FALSE}
-
-fitsock <- lm(sockeye_hab ~ PC1 + PC2 , data = pcout)
-summary(fitsock)
-
-print(res.pca)
-
-myvarz <- c("slope_avgW", "slope_cvW" , "elev_avgW" , "sinuosity", "flood_elev", "elev_avgS", "wetland", "slope_avgS", "elev_cvS", "ccomplexity",
-            "forest", "shrub", "floodplainA", "lakeD", "sockeye_hab")
-socksub <- pcout[myvarz]
-chart.Correlation(socksub, histogram=TRUE, pch=19)
-
-fitsock <- lm(sockeye_hab ~ slope_avgW + slope_cvW + elev_avgW + sinuosity + flood_elev + elev_avgS + wetland + slope_avgS + elev_cvS +
-                ccomplexity + forest + shrub + floodplainA + lakeD , data = socksub)
-
-
-stepsock <- stepAIC(fitsock, direction="both")
-stepsock$anova
-
-summary (stepsock)
-
-vif(lm(sockeye_hab ~ slope_avgW + slope_cvW + elev_avgW + wetland + slope_avgS + elev_cvS + ccomplexity + forest + shrub  + lakeD , data = socksub))
-
-fitsock2 <- lm(sockeye_hab ~ slope_avgW  + elev_avgW + wetland + slope_avgS + elev_cvS + ccomplexity + forest + shrub  + lakeD , data = socksub)
-summary(fitsock2)
-vif(lm(sockeye_hab ~ slope_avgW  + elev_avgW + wetland + slope_avgS + elev_cvS + ccomplexity + forest + shrub  + lakeD , data = socksub))
-
-fitsock3 <- lm(sockeye_hab ~ slope_avgW  + wetland + slope_avgS +  ccomplexity + forest + shrub  + lakeD , data = socksub)
-summary(fitsock3)
-
-
-
-```
